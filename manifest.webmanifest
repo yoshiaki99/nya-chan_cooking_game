@@ -1,0 +1,16 @@
+{
+  "name": "ニャーちゃん おりょうりゲーム",
+  "description": "ニャーちゃんになって お料理を作り、ニューちゃんに食べてもらう、小さなお子さま向けの無料のゲーム",
+  "short_name": "ニャーちゃん りょうり",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#fbeef0",
+  "theme_color": "#fbeef0",
+  "lang": "ja",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

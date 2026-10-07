@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# 公開用に そろえた ファイル（tools/build.py --out _site）
+_site/
+
+# 声を作るときの もとの WAV（大きいので入れない。要件定義書 N-54）
+tools/voice_wav/
+
+# Python
+__pycache__/
+*.pyc
+
+# 声の候補の WAV（大きい。聞きくらべ.html と voices.json だけ入れる）
+assets/voice_samples/*/

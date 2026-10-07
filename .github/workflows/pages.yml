@@ -1,0 +1,47 @@
+# main に入ったら、ゲームを GitHub Pages に公開する（要件定義書 6.6 N-42）
+name: Pages に公開
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: セリフの たしかめ（さいごに「ニャー」・漢字なし）
+        run: node tools/check_lines.js
+      - name: ネコの体に わるい 食べものが 出ていないかの たしかめ
+        run: node tools/check_foods.js
+      - name: 絵（SVG）の たしかめ
+        run: node tools/check_svg.js
+      - name: 公開するファイルを そろえる（sw.js の一覧も作りなおす）
+        run: python3 tools/build.py --out _site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

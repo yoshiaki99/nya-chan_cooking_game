@@ -1,0 +1,10 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "nya-ryouri-game",
+      "url": "http://localhost:8776",
+      "port": 8776
+    }
+  ]
+}
