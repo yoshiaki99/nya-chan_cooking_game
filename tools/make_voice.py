@@ -263,13 +263,12 @@ def collect():
             for i, t in enumerate(vals):
                 out.append((f'{pre}_{key}' + (f'_{i + 1}' if len(vals) > 1 else ''), t))
     # ボタンなどの名前（前に作ったものと同じ id にしておく）
+    # （おせわゲームに あった おやすみなさい・リボン・おえかき・アルバム・メイク・ふくの 前後の ボタンは、
+    #   おりょうりゲームでは 読まないので 入れない）
     out += [('g_back', 'もどる'), ('g_yatta', 'やったね'), ('g_bye', 'またね'), ('g_again', 'はじめに もどる'),
-            ('g_goodnight', 'おやすみなさい'), ('g_start', 'はじめる'), ('g_title', G['CHARACTER']['title']),
-            ('g_ribbon_next', 'つぎの リボン'), ('g_ribbon_prev', 'まえの リボン'), ('g_stickers_all', 'ぜんぶ あつめたよ！'),
-            ('g_draw_eraser', 'けしゴム'), ('g_draw_clear', 'ぜんぶ けす'), ('g_draw_done', 'できた'),
-            ('g_album', 'アルバム'), ('g_album_close', 'とじる'), ('g_page_next', 'つぎの ページ'), ('g_page_prev', 'まえの ページ'),
-            ('g_makeup_off', 'おとす'), ('g_acc_off', 'はずす'), ('g_clothes_off', 'ぬぐ'), ('g_clothes_color', 'いろ'),
-            ('g_clothes_next', 'つぎの ふく'), ('g_clothes_prev', 'まえの ふく')]
+            ('g_start', 'はじめる'), ('g_title', G['CHARACTER']['title']),
+            ('g_stickers_all', 'ぜんぶ あつめたよ！'), ('g_draw_done', 'できた'),
+            ('g_page_next', 'つぎの ページ'), ('g_page_prev', 'まえの ページ'), ('g_clothes_color', 'いろ')]
     for var, pre in (('CARES', 'care'), ('FOODS', 'food'), ('SOAPS', 'soap'), ('BATH_TOYS', 'bathtoy'), ('GAMES', 'game'),
                      ('CRAYONS', 'crayon'), ('DRAW_STAMPS', 'stamp'), ('RIBBONS', 'ribbon'), ('ACCESSORY_SLOTS', 'acc_slot'),
                      ('ACCESSORIES', 'acc'), ('CLOTHES', 'clothes'), ('OUTINGS', 'outing'),
