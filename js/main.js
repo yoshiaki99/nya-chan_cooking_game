@@ -35,6 +35,7 @@ G.Screens = G.Screens || {};
     if (current && current.leave) current.leave();
     G.Voice.stop();
     G.Sound.shower(false);
+    G.Sound.sizzle(false);
     const root = $('#screens');
     root.querySelectorAll('.screen').forEach(old => {
       old.classList.add('out');

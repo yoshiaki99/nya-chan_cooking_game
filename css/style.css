@@ -685,3 +685,95 @@ body.portrait #stage { visibility: hidden; }
 .rq-dish { position: absolute; inset: 18px 14px; z-index: 1; }
 .rq-dish svg { width: 100%; height: 100%; display: block; }
 .request.pressed { transform: scale(.93); }
+
+/* ================= おりょうり（js/screens/cook.js・js/steps.js） ================= */
+.work, .gather, .deco, .recipe-box { z-index: 2; }
+.work > *, .gather > *, .deco > *, .recipe-box > * { position: absolute; }
+.wk svg, .ing svg, .need-slot svg, .deco-tool svg, .deco-ghost svg, .deco-plate svg, .eat-dish svg, .table-front svg,
+.tray svg, .shelf svg, .fridge svg, .choice svg, .btn-check svg, .rc-art svg, .rc-pan svg, .rc-lock svg, .cf-q svg, .cf-no svg, .cf-yes svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.wk { pointer-events: none; }
+.wk-drag, .choice, .btn-check { pointer-events: auto; }
+.work { touch-action: none; }
+.lift { z-index: 9 !important; filter: drop-shadow(0 14px 10px rgba(90, 60, 70, .3)); }
+.used { pointer-events: none !important; }
+.choice { background: #fff; border-radius: 30px; box-shadow: 0 0 0 4px #f3d9df, 0 6px 0 4px rgba(201, 95, 127, .15); transition: transform .12s; }
+.choice .ch-art { position: absolute; inset: 12px; pointer-events: none; }
+.choice.pressed { transform: scale(.9); }
+.choice.used { opacity: .4; }
+.btn-check {
+  border-radius: 50%; background: linear-gradient(#a6dc8e, #6dbb5e); border: 6px solid #fff; z-index: 6;
+  box-shadow: 0 0 0 5px var(--gold), 0 10px 0 5px rgba(80, 140, 70, .4); animation: breathe 2s ease-in-out infinite; padding: 18px;
+}
+.btn-check.pressed { transform: scale(.9); animation: none; }
+.btn-check.used { opacity: 0; transition: opacity .3s; }
+.wk-cake.ready { filter: drop-shadow(0 0 22px rgba(255, 210, 120, .95)); }
+.wk-flame.on { animation: flicker .5s ease-in-out infinite alternate; }
+@keyframes flicker { from { filter: brightness(1); } to { filter: brightness(1.25) saturate(1.2); } }
+
+/* じゅんばんの まる */
+.step-dots { display: flex; justify-content: center; align-items: center; gap: 18px; z-index: 5; pointer-events: none; }
+.step-dots i { width: 34px; height: 34px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px #f3d9df; transition: all .3s; }
+.step-dots i.done { background: #f6a8c8; box-shadow: 0 0 0 4px #fff; }
+.step-dots i.now { width: 48px; height: 48px; background: #ffd24d; box-shadow: 0 0 0 5px #fff, 0 0 18px 6px rgba(255, 210, 90, .8); }
+
+/* やめる？ */
+.confirm-wrap { position: absolute; inset: 0; z-index: 20; pointer-events: auto; background: rgba(90, 50, 60, .35); opacity: 0; transition: opacity .25s; }
+.confirm-wrap.show { opacity: 1; }
+.confirm { position: absolute; left: 433px; top: 230px; width: 500px; height: 520px; background: #fffaf3; border-radius: 50px; box-shadow: 0 0 0 6px #fff, 0 0 0 11px var(--gold); }
+.cf-q { position: absolute; left: 110px; top: 40px; width: 280px; height: 230px; }
+.cf-btns { position: absolute; left: 0; right: 0; bottom: 50px; display: flex; justify-content: center; gap: 60px; }
+.cf-no, .cf-yes { width: 150px; height: 150px; border-radius: 50%; border: 6px solid #fff; padding: 26px; transition: transform .12s; }
+.cf-no { background: linear-gradient(#bfe2f5, #86c0e6); box-shadow: 0 0 0 5px #86c0e6; }
+.cf-yes { background: linear-gradient(#f7b6c6, #e98aa5); box-shadow: 0 0 0 5px #e98aa5; }
+.cf-no.pressed, .cf-yes.pressed { transform: scale(.9); }
+
+/* ニューちゃんが のぞく */
+.nyu.peek { z-index: 6; transform: translateY(380px); transition: transform .5s cubic-bezier(.3,1.4,.5,1); pointer-events: none; }
+.nyu.peek.show { transform: translateY(0); }
+.nyu.peek .ny-shadow { display: none; }
+
+/* ざいりょうを あつめる */
+.need-list { display: flex; align-items: center; justify-content: center; gap: 10px; background: #fffaf3; border-radius: 30px; box-shadow: 0 0 0 4px #f3d9df; padding: 0 15px; }
+.need-slot { position: relative; width: 100px; height: 100px; opacity: .3; filter: grayscale(1); transition: opacity .3s, filter .3s; }
+.need-slot.got { opacity: 1; filter: none; }
+.need-slot.got::after { content: '✓'; position: absolute; right: -6px; bottom: -6px; width: 40px; height: 40px; border-radius: 50%; background: #6dbb5e; color: #fff; font-size: 30px; text-align: center; line-height: 40px; }
+.ing { z-index: 3; transition: filter .2s; }
+.ing.in-fridge { z-index: 4; }
+.ing.glow { animation: need 1.2s ease-in-out infinite; filter: drop-shadow(0 0 16px rgba(255, 210, 90, 1)); }
+.ing.on-tray { z-index: 3; }
+.fridge { z-index: 2; }
+.fridge > div { position: absolute; inset: 0; }
+.fr-door { transform-origin: 0% 50%; transition: transform .5s ease, opacity .5s; }
+.fridge.open .fr-door { transform: perspective(900px) rotateY(-75deg); opacity: .0; pointer-events: none; }
+
+/* もりつけ */
+.deco-plate { z-index: 3; }
+.deco-tool { background: #fff; border-radius: 30px; box-shadow: 0 0 0 4px #f3d9df, 0 6px 0 4px rgba(201, 95, 127, .15); padding: 12px; transition: transform .12s; z-index: 4; }
+.deco-tool.sel { box-shadow: 0 0 0 7px var(--gold), 0 0 26px 8px rgba(255, 220, 130, .85); }
+.deco-tool.sauce { background: #fff6dc; }
+.deco-tool.pressed { transform: scale(.9); }
+.deco-ghost { z-index: 9; pointer-events: none; opacity: .85; }
+
+/* レシピを えらぶ */
+.recipe-shade { inset: 0; background: rgba(255, 246, 236, .7); z-index: 1; }
+.recipe-card { background: #fffaf3; border-radius: 34px; box-shadow: 0 0 0 5px #f3d9df, 0 8px 0 5px rgba(201, 95, 127, .18); transition: transform .12s; overflow: visible; }
+.recipe-card.pressed { transform: scale(.94); }
+.rc-art { position: absolute; left: 30px; top: 18px; width: 240px; height: 200px; pointer-events: none; }
+.rc-name { position: absolute; left: 0; right: 0; top: 214px; text-align: center; font-size: 34px; color: #5a4148; white-space: nowrap; pointer-events: none; }
+.rc-level { position: absolute; left: 0; right: 0; top: 260px; display: flex; justify-content: center; gap: 4px; pointer-events: none; }
+.rc-pan { width: 40px; height: 40px; }
+.recipe-card.locked .rc-art { filter: brightness(0); opacity: .14; }
+.recipe-card.locked .rc-level { opacity: .3; }
+.rc-lock { position: absolute; left: 50%; top: 80px; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; font-size: 40px; color: var(--rose); pointer-events: none; white-space: nowrap; }
+.rc-lock svg { width: 46px; height: 42px; }
+.rc-soon { position: absolute; left: 20px; right: 20px; top: 92px; text-align: center; font-size: 30px; color: #fff; background: rgba(150, 130, 150, .85); border-radius: 20px; padding: 6px 0; transform: rotate(-6deg); pointer-events: none; }
+.recipe-card.soon .rc-art { opacity: .55; }
+.rc-req { position: absolute; right: -24px; top: -30px; width: 110px; height: 110px; object-fit: contain; pointer-events: none; filter: drop-shadow(0 4px 4px rgba(90, 60, 70, .25)); }
+
+/* いただきます */
+.table-front { z-index: 3; pointer-events: none; }
+.eat-dish { z-index: 4; }
+.btn-back-kitchen { left: 468px; top: 870px; width: 430px; height: 120px; font-size: 42px; z-index: 6; letter-spacing: .04em; }
+/* おりょうり中は ふきだしが 作業場の タッチを じゃましないように */
+.screen-cook .bubble, .screen-eat .bubble { pointer-events: none; }
+.bubble.narrow .bubble-text { max-width: 340px; }

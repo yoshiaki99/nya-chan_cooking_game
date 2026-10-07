@@ -24,6 +24,7 @@ G.State = (function () {
       tummy: 0,       // ニューちゃんが たべた 数（G.TUMMY_FULL で いっぱい：F-85）
       request: null,  // ニューちゃんの リクエスト（レシピの id：F-30）
       firstDone: false, // はじめての おにぎりを 作ったか（F-31）
+      safety: {},     // 火・ほうちょうを はじめて つかったときの ひとことを 言ったか（F-6F。1回だけ）
       // おせわゲームと 同じ しくみ（js/chara.js・js/accessory.js）が 読む おしゃれ。エプロン・ぼうしは 第2段階
       ribbon: 'none',
       ribbonSide: 'right',
@@ -104,12 +105,18 @@ G.State = (function () {
   /* つぎの リクエスト（F-31）：はじめは かならず おにぎり。おなじものが つづかないように */
   function nextRequest() {
     if (!d.firstDone) { d.request = 'onigiri'; save(); return d.request; }
-    const list = recipes().filter(r => r.id !== d.request);
+    const list = recipes().filter(r => r.ready && r.id !== d.request); // まだ 作れない レシピは たのまない
     d.request = list.length ? list[Math.floor(Math.random() * list.length)].id : 'onigiri';
     save();
     return d.request;
   }
   const request = () => d.request;
+  /* はじめての ときだけ true（火・ほうちょうの ひとこと：F-6F） */
+  function firstTime(kind) {
+    if (d.safety[kind]) return false;
+    d.safety[kind] = true; save();
+    return true;
+  }
   function takeNewRecipes() {
     const out = G.RECIPES.filter(r => !r.season && r.unlock > d.seenRecipes && r.unlock <= d.hearts);
     if (out.length) { d.seenRecipes = Math.max.apply(null, out.map(r => r.unlock)); save(); }
@@ -195,7 +202,7 @@ G.State = (function () {
   return {
     load, save, saveNow, hasSave, tick, catchUp,
     tummy, tummyPlates, isFull, eat,
-    hasRecipe, recipes, markCooked, cookedCount, nextRequest, request, takeNewRecipes, takeSeasonGifts,
+    hasRecipe, recipes, markCooked, cookedCount, nextRequest, request, firstTime, takeNewRecipes, takeSeasonGifts,
     addHearts, hearts, unsentHearts, markSent, stickerCount, takeNewStickers, heartsToNextSticker,
     ribbon, ribbonSide, makeup, wear, clothes, clothColor, addMeter, level, photos,
     isNewDay, markDay, pet, playSecToday, overLimit, settings, setSetting, reset

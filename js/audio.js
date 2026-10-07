@@ -175,12 +175,43 @@ G.Sound = (function () {
     },
     don: () => { tone({ f: 120, f2: 66, dur: 0.4, vol: 0.34, attack: 0.004 }); noiseHit({ ftype: 'lowpass', f: 260, dur: 0.14, vol: 0.22 }); },
     jingle: () => [0, 0.09, 0.18, 0.27, 0.4, 0.49].forEach((at, i) => { tone({ f: [2349, 2637, 2794][i % 3], dur: 0.3, vol: 0.035, at }); noiseHit({ at, f: 7000, q: 3, dur: 0.05, vol: 0.03 }); }),
-    boo: () => { tone({ type: 'triangle', f: 520, f2: 300, dur: 0.7, vol: 0.12, attack: 0.06 }); tone({ type: 'sine', f: 780, f2: 450, dur: 0.6, vol: 0.04, attack: 0.08, at: 0.05 }); }
+    boo: () => { tone({ type: 'triangle', f: 520, f2: 300, dur: 0.7, vol: 0.12, attack: 0.06 }); tone({ type: 'sine', f: 780, f2: 450, dur: 0.6, vol: 0.04, attack: 0.08, at: 0.05 }); },
+    // おりょうり（とんとん・ぱかっ・まぜまぜ・チン！・くるっ）
+    chop: () => { noiseHit({ f: 1400, q: 1.2, dur: 0.05, vol: 0.3 }); tone({ f: 220, f2: 140, dur: 0.07, vol: 0.12 }); },
+    crack: () => { noiseHit({ f: 2600, q: 2, dur: 0.04, vol: 0.25 }); tone({ f: 900, f2: 500, dur: 0.06, vol: 0.06, at: 0.03 }); },
+    plopEgg: () => { tone({ f: 500, f2: 200, dur: 0.16, vol: 0.12 }); },
+    stir: () => noiseHit({ f: 700 + Math.random() * 300, f2: 1300, q: 1.5, dur: 0.18, vol: 0.06, attack: 0.04 }),
+    squish: () => { tone({ type: 'triangle', f: 260, f2: 200, dur: 0.12, vol: 0.1 }); noiseHit({ ftype: 'lowpass', f: 700, dur: 0.1, vol: 0.08 }); },
+    spread: () => noiseHit({ f: 1800, f2: 1200, q: 1, dur: 0.16, vol: 0.05, attack: 0.04 }),
+    click: () => { tone({ f: 1500, dur: 0.03, vol: 0.12 }); tone({ f: 900, dur: 0.04, vol: 0.08, at: 0.05 }); },
+    ding: () => { musicBox(m('E6'), ctx.currentTime, 1.4, 0.22); musicBox(m('C6'), ctx.currentTime + 0.18, 1.6, 0.18); },
+    flip: () => { noiseHit({ f: 500, f2: 2000, q: 0.8, dur: 0.22, vol: 0.12, attack: 0.03 }); tone({ f: 400, f2: 800, dur: 0.18, vol: 0.06 }); },
+    place: () => tone({ f: 700, f2: 1000, dur: 0.07, vol: 0.12 })
   };
 
   function play(name) {
     if (!ctx || ctx.state !== 'running' || vol.sfx <= 0) return;
     try { sfx[name] && sfx[name](); } catch (e) { /* 音が出なくても続ける */ }
+  }
+
+  /* フライパンの ジュージュー（つけっぱなし） */
+  let sizzleNode = null;
+  function sizzle(on) {
+    if (!ctx) return;
+    if (on && !sizzleNode && vol.sfx > 0) {
+      const s = ctx.createBufferSource(); s.buffer = noise(); s.loop = true;
+      const hp = ctx.createBiquadFilter(); hp.type = 'bandpass'; hp.frequency.value = 3800; hp.Q.value = 0.6;
+      const am = ctx.createGain(); am.gain.value = 0.6;
+      const lfo = ctx.createOscillator(); lfo.type = 'sawtooth'; lfo.frequency.value = 9;
+      const lg = ctx.createGain(); lg.gain.value = 0.4; lfo.connect(lg); lg.connect(am.gain);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.4);
+      s.connect(hp); hp.connect(am); am.connect(g); g.connect(sfxBus); s.start(); lfo.start();
+      sizzleNode = { s, g, lfo };
+    } else if (!on && sizzleNode) {
+      const { s, g, lfo } = sizzleNode; sizzleNode = null;
+      g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15);
+      s.stop(ctx.currentTime + 0.8); lfo.stop(ctx.currentTime + 0.8);
+    }
   }
 
   let showerNode = null;
@@ -358,7 +389,7 @@ G.Sound = (function () {
   }
 
   return {
-    init, play, shower, playBgm, stopBgm, setVolume, duck, m,
+    init, play, shower, sizzle, playBgm, stopBgm, setVolume, duck, m,
     ready: () => !!ctx && ctx.state === 'running',
     context: () => ctx, voiceOut: () => voiceBus
   };

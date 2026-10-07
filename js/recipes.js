@@ -62,32 +62,46 @@ G.INGREDIENTS = [
   { id: 'icing',      label: 'アイシング',     where: 'shelf' }
 ];
 
-/* こうてい（5.6 F-60〜F-6C）。いまは 名前だけ。操作は 第1段階で js/steps/*.js に 作る */
+/* こうてい（5.6 F-60〜F-6C）。操作は js/steps.js（G.StepKit）。ready が ついて いない ものは まだ 作って いない */
 G.STEPS = {
+  scoop:   { label: 'ごはんを よそう', ready: true },
+  filling: { label: 'ぐを えらぶ', ready: true },
+  shape:   { label: 'にぎる', ready: true },
+  wrap:    { label: 'のりを まく', ready: true },
+  fill:    { label: 'はさむ', ready: true },
   wash:    { label: 'あらう' },
-  cut:     { label: 'きる' },
-  crack:   { label: 'わる' },
-  mix:     { label: 'まぜる' },
+  cut:     { label: 'きる', ready: true },
+  crack:   { label: 'わる', ready: true },
+  mix:     { label: 'まぜる', ready: true },
   knead:   { label: 'こねる・にぎる' },
   roll:    { label: 'のばす' },
   cutout:  { label: 'かたぬき' },
-  spread:  { label: 'ぬる・のせる・はさむ' },
-  fry:     { label: 'やく・いためる' },
-  flip:    { label: 'ひっくりかえす' },
+  spread:  { label: 'ぬる', ready: true },
+  fry:     { label: 'やく・いためる', ready: true },
+  flip:    { label: 'ひっくりかえす', ready: true },
   boil:    { label: 'にる' },
   oven:    { label: 'オーブン' },
   chill:   { label: 'ひやす' },
   serve:   { label: 'もりつけ' }
 };
 
-/* レシピ（5.9）。level = むずかしさ（フライパンの数）。unlock = ハートの数、season = その月に とどく */
+/* レシピ（5.9）。level = むずかしさ（フライパンの数）。unlock = ハートの数、season = その月に とどく
+ *   items = あつめる ざいりょう、steps = こうていの じゅんばん（{ t: こうてい, …その こうていの 設定 }）、
+ *   toppings = もりつけで のせられる もの（5つまで：N-04）、sauce = ソースで おえかき できる もの
+ *   ready = さいごまで 作れる（こうていが ぜんぶ できている）。ない ものは レシピえらびで「じゅんびちゅう」 */
 G.RECIPES = [
-  { id: 'onigiri',   label: 'おにぎり',       level: 1, unlock: 0,
-    items: ['rice', 'nori', 'salmon'], steps: ['knead', 'spread', 'serve'], toppings: ['salmon', 'okaka', 'tuna'] },
-  { id: 'sandwich',  label: 'サンドイッチ',   level: 1, unlock: 0,
-    items: ['bread', 'butter', 'egg', 'cucumber'], steps: ['spread', 'spread', 'cut', 'serve'], toppings: ['egg', 'tuna', 'cucumber', 'jam'] },
-  { id: 'pancake',   label: 'ホットケーキ',   level: 2, unlock: 0,
-    items: ['flour', 'egg', 'milk'], steps: ['crack', 'mix', 'fry', 'flip', 'serve'], toppings: ['strawberry', 'banana', 'whip', 'honey', 'blueberry'] },
+  { id: 'onigiri',   label: 'おにぎり',       level: 1, unlock: 0, ready: true,
+    items: ['rice', 'nori', 'salmon'],
+    steps: [{ t: 'scoop' }, { t: 'filling', options: ['salmon', 'okaka', 'tuna'] }, { t: 'shape' }, { t: 'wrap' }],
+    toppings: ['egg', 'broccoli', 'tomato', 'cucumber', 'salmon'] },
+  { id: 'sandwich',  label: 'サンドイッチ',   level: 1, unlock: 0, ready: true,
+    items: ['bread', 'butter', 'egg', 'cucumber'],
+    steps: [{ t: 'spread' }, { t: 'fill', options: ['egg', 'tuna', 'cucumber', 'cheese', 'jam'] }, { t: 'cut' }],
+    toppings: ['tomato', 'broccoli', 'strawberry', 'banana', 'cheese'] },
+  { id: 'pancake',   label: 'ホットケーキ',   level: 2, unlock: 0, ready: true,
+    items: ['flour', 'egg', 'milk'],
+    steps: [{ t: 'crack' }, { t: 'mix' }, { t: 'fry' }, { t: 'flip' }],
+    toppings: ['strawberry', 'banana', 'whip', 'blueberry'], sauce: 'honey' },
   { id: 'omurice',   label: 'オムライス',     level: 2, unlock: 6,
     items: ['rice', 'carrot', 'chicken', 'egg', 'tomatosauce'], steps: ['cut', 'fry', 'crack', 'fry', 'serve'], toppings: ['tomatosauce', 'broccoli'] },
   { id: 'grillfish', label: 'やきざかな',     level: 1, unlock: 12,

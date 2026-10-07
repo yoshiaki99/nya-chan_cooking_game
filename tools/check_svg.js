@@ -12,7 +12,7 @@ const vm = require('vm');
 const root = path.join(__dirname, '..');
 const ctx = { window: {}, console };
 ctx.window.G = ctx.G = {};
-['js/character.js', 'js/data.js', 'js/art.js', 'js/art_kitchen.js', 'js/clothes.js', 'js/accessory.js'].forEach(f =>
+['js/character.js', 'js/data.js', 'js/art.js', 'js/art_kitchen.js', 'js/art_food.js', 'js/clothes.js', 'js/accessory.js'].forEach(f =>
   vm.runInNewContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx));
 const G = ctx.G;
 G.State = { clothColor: () => null, ribbon: () => 'pink' };

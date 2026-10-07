@@ -114,15 +114,19 @@ G.Screens.home = {
       req.classList.add('show');
       return r;
     };
+    // ふきだしを タッチすると、その おりょうりに すぐ すすむ（F-33）
     UI.tap(req, () => {
       const r = G.recipe(S.request());
-      if (r) sayNyu(r.label + '！ ' + N.request, 'happy');
+      if (!r || busy || G.isRewarding()) return;
+      if (!r.ready) { sayNyu(r.label + '！ ' + N.request, 'happy'); return; }
+      G.Voice.speak(r.label + 'を つくる ニャー！', 'chara');
+      G.go('cook', { recipe: r.id });
     }, { sound: 'soft' });
 
     /* 下の ボタン（F-21）：つくる・おしゃれ・レシピちょう・（おうちに かえる）・またね */
     const comingSoon = () => { if (!busy) say(L.comingSoon, 'face_prim'); };
     const buttons = [
-      { id: 'cook', label: 'つくる', icon: 'icon_cook', fn: comingSoon },
+      { id: 'cook', label: 'つくる', icon: 'icon_cook', fn: () => G.go('recipes') },
       { id: 'dress', label: 'おしゃれ', icon: 'icon_apron', fn: comingSoon },
       { id: 'recipes', label: 'レシピ', icon: 'icon_recipe', fn: comingSoon }
     ];

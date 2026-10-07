@@ -33,11 +33,14 @@ G.STICKERS.forEach(s => checkName('シール', s.label));
 
 /* レシピの ざいりょう・トッピングが ぜんぶ ある */
 const ids = new Set(G.INGREDIENTS.map(x => x.id));
-G.RECIPES.forEach(r => [...r.items, ...r.toppings].forEach(id => {
+G.RECIPES.forEach(r => [...r.items, ...r.toppings, ...(r.sauce ? [r.sauce] : []),
+  ...r.steps.flatMap(st => (typeof st === 'object' && st.options) || [])].forEach(id => {
   if (!ids.has(id)) errors.push(`レシピ「${r.label}」の ざいりょう ${id} が G.INGREDIENTS に ない`);
 }));
 G.RECIPES.forEach(r => r.steps.forEach(st => {
-  if (!G.STEPS[st]) errors.push(`レシピ「${r.label}」の こうてい ${st} が G.STEPS に ない`);
+  const t = typeof st === 'object' ? st.t : st;
+  if (!G.STEPS[t]) errors.push(`レシピ「${r.label}」の こうてい ${t} が G.STEPS に ない`);
+  else if (r.ready && !G.STEPS[t].ready) errors.push(`レシピ「${r.label}」は ready なのに、こうてい ${t} が まだ できていない`);
 }));
 
 /* セリフ */

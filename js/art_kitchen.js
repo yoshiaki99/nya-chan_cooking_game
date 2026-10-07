@@ -132,6 +132,30 @@ window.G = window.G || {};
       <path d="M24 48 q20 22 40 0 q20 22 40 0 q20 22 40 0 q20 22 40 0 q20 22 40 0 q20 22 40 0 q20 22 40 0 q20 22 40 0 q20 22 40 0 q20 22 40 0" fill="#f9c6d3" ${ink(3)}/>`);
   }
 
+  /* ---------- 背景：カウンターの アップ（おりょうりの 画面） ---------- */
+  function bgCounter() {
+    const tiles = [];
+    for (let x = 0; x <= 1366; x += 64) tiles.push(`M${x} 0V250`);
+    for (let y = 0; y <= 250; y += 64) tiles.push(`M0 ${y}H1366`);
+    const grain = [330, 420, 560, 700, 840, 960].map((y, i) => `<path d="M0 ${y} q${340 + i * 30} ${i % 2 ? 18 : -18} 683 0 t683 0" fill="none" stroke="#ecd2a6" stroke-width="5"/>`).join('');
+    return svg('0 0 1366 1024', `
+      <rect width="1366" height="260" fill="#ffffff"/>
+      <path d="${tiles.join('')}" stroke="#d9ecf3" stroke-width="4"/>
+      <rect y="250" width="1366" height="774" fill="#f8e3bf"/>
+      ${grain}
+      <rect y="236" width="1366" height="30" fill="#fffaf0" ${ink(4)}/>`, 'preserveAspectRatio="xMidYMid slice"');
+  }
+
+  /* テーブル（まえから 見た。いただきますの 画面）。900×424 */
+  function tableFront() {
+    return svg('0 0 900 424', `
+      <path d="M70 120 V420 M830 120 V420" ${ink(26, '#e9b98a')}/>
+      <path d="M70 120 V420 M830 120 V420" fill="none" ${ink(5)}/>
+      <rect x="10" y="20" width="880" height="110" rx="26" fill="#fffaf0" ${ink(5)}/>
+      <path d="M24 130 ${Array.from({ length: 22 }, () => 'q20 26 40 0').join(' ')}" fill="#f9c6d3" ${ink(4)}/>
+      <path d="M40 60 h820" stroke="#fde3ea" stroke-width="10" stroke-dasharray="40 30" stroke-linecap="round"/>`);
+  }
+
   /* ---------- ボタンの 絵 ---------- */
   const icons = {
     icon_cook: () => svg('0 0 100 100', `
@@ -192,6 +216,8 @@ window.G = window.G || {};
   Object.assign(G.Art.all, icons, dishes, {
     bg_kitchen: () => bgKitchen(false),
     bg_kitchen_night: () => bgKitchen(true),
-    kitchen_table: () => kitchenTable()
+    kitchen_table: () => kitchenTable(),
+    bg_counter: () => bgCounter(),
+    table_front: () => tableFront()
   });
 })();
