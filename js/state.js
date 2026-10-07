@@ -63,6 +63,7 @@ G.State = (function () {
     if (d.wear.head && !G.ACCESSORIES.some(c => c.id === d.wear.head)) d.wear.head = 'chefhat';
     catchUp();
     applySettings();
+    if (G.Link) G.Link.setLimit(d.settings.limit);
   }
   function hasSave() { try { return !!localStorage.getItem(KEY); } catch (e) { return false; } }
 
@@ -92,6 +93,7 @@ G.State = (function () {
     digest(mul * sec / 3600);
     if (d.play.day !== today()) d.play = { day: today(), sec: 0 };
     d.play.sec += sec;
+    if (G.Link) G.Link.addPlay(sec); // おせわゲームと あわせて かぞえる（F-D9）
     d.lastTime = Date.now();
     save();
   }
@@ -210,12 +212,16 @@ G.State = (function () {
   }
 
   /* ---- プレイ時間（F-C0） ---- */
-  function playSecToday() { return d.play.day === today() ? d.play.sec : 0; }
-  function overLimit() { return d.settings.limit > 0 && playSecToday() >= d.settings.limit * 60; }
+  /* 今日の プレイ時間は おせわゲームと あわせた もの。上限は 2つの ゲームの 設定の みじかい ほう（F-C0・F-D9） */
+  function playSecToday() { return Math.max(d.play.day === today() ? d.play.sec : 0, G.Link ? G.Link.playSecToday() : 0); }
+  function overLimit() {
+    const lim = G.Link ? G.Link.limitMin() || d.settings.limit : d.settings.limit;
+    return lim > 0 && playSecToday() >= lim * 60;
+  }
 
   /* ---- 保護者の設定 ---- */
   const settings = () => d.settings;
-  function setSetting(k, v) { d.settings[k] = v; applySettings(); saveNow(); }
+  function setSetting(k, v) { d.settings[k] = v; applySettings(); saveNow(); if (k === 'limit' && G.Link) G.Link.setLimit(v); }
   function applySettings() {
     const s = d.settings;
     G.Sound.setVolume(s.bgm, s.sfx);

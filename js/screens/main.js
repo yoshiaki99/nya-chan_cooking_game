@@ -130,7 +130,7 @@ G.Screens.home = {
       { id: 'dress', label: 'おしゃれ', icon: 'icon_apron', fn: () => G.go('dress') },
       { id: 'recipes', label: 'レシピ', icon: 'icon_recipe', fn: () => G.go('book') }
     ];
-    if (G.Link.canGoHome()) buttons.push({ id: 'home', label: 'おうち', icon: 'icon_door', fn: comingSoon });
+    if (G.Link.canGoHome()) buttons.push({ id: 'home', label: 'おうち', icon: 'icon_door', fn: goHome });
     buttons.forEach((b, i) => {
       const el = UI.el('div', 'btn-care care-' + b.id);
       UI.pos(el, 84 + i * 176, 838);
@@ -139,6 +139,33 @@ G.Screens.home = {
       scr.appendChild(el);
       UI.tap(el, () => { if (!G.isRewarding()) b.fn(); }, { say: b.label });
     });
+    /* おせわゲームに かえる。ハートを 持ちかえる（5.14 F-D1〜F-D5） */
+    async function goHome() {
+      if (busy) return;
+      busy = true;
+      if (!(await G.Link.osewaReachable())) { await say(L.offlineHome, 'face_prim'); busy = false; return; }
+      const n = S.unsentHearts();
+      chara.hop(36);
+      const talk = say(n ? 'ハートを ' + n + 'こ もってかえる ニャー！' : L.goHomeNone, 'face_happy');
+      sayNyu(N.byeHome, 'happy');
+      const sent = G.Link.sendHome();
+      const door = scr.querySelector('.care-home');
+      if (sent && door) {
+        const d = UI.rectOf(door), p = chara.point(0.5, 0.3);
+        for (let i = 0; i < Math.min(sent, 10); i++) sc.timeout(() => {
+          const h = UI.el('div', 'fx fx-heart', G.Art.heart());
+          UI.pos(h, p.x - 28, p.y - 28, 56, 56);
+          document.querySelector('#fx').appendChild(h);
+          h.animate([{ transform: 'translate(0,0) scale(.5)' }, { transform: `translate(${(d.cx - p.x) / 2}px, ${-160}px) scale(1.2)`, offset: 0.5 }, { transform: `translate(${d.cx - p.x}px, ${d.cy - p.y}px) scale(.4)` }], { duration: 900, easing: 'ease-in-out', fill: 'forwards' }).onfinish = () => h.remove();
+          G.Sound.play('heart');
+        }, i * 160);
+      }
+      await talk;
+      G.Sound.play('door');
+      await sc.wait(600);
+      G.Link.goOsewa();
+    }
+
     const bye = UI.el('div', 'btn-care btn-bye');
     UI.pos(bye, 1180, 838);
     bye.appendChild(G.Assets.node('icon_bye', 'bc-icon'));

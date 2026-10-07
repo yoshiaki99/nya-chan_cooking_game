@@ -110,7 +110,7 @@ G.Screens = G.Screens || {};
         <h2>保護者メニュー</h2>
         <section><h3>1日のプレイ時間の上限</h3>
           <div class="seg" data-k="limit"><button data-v="15">15分</button><button data-v="30">30分</button><button data-v="0">なし</button></div>
-          <p class="note">今日のプレイ時間：約${mins}分。上限になると、キッチンに戻ったときにニャーちゃんが「きょうは ここまで」と言って終わります（お料理の途中では終わりません）。</p></section>
+          <p class="note">今日のプレイ時間：約${mins}分（おせわゲームと合わせた時間）。上限になると、キッチンに戻ったときにニャーちゃんが「きょうは ここまで」と言って終わります（お料理の途中では終わりません）。おせわゲームにも上限を決めているときは、短いほうになります。</p></section>
         <section><h3>音量</h3>
           <label>BGM<input type="range" min="0" max="100" data-k="bgm" value="${Math.round(st.bgm * 100)}"></label>
           <label>効果音<input type="range" min="0" max="100" data-k="sfx" value="${Math.round(st.sfx * 100)}"></label>

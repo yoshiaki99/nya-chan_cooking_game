@@ -4,7 +4,7 @@
  * ・新しい版が公開されると、次に開いたときに、変わったファイルだけを受け取って入れかわる。
  * 下の VERSION と FILES は tools/build.py が自動で書きかえるので、手で直さなくてよい。 */
 /* @@FILES-BEGIN */
-const VERSION = '5445d7ae11';
+const VERSION = '10cd2a7d83';
 const FILES = [
   ["index.html", "c7db3f8838"],
   ["assets/characters/nya_act_bath_fluffy.png", "81401cdcec"],
@@ -47,19 +47,19 @@ const FILES = [
   ["js/assets.js", "44269b1a2d"],
   ["js/audio.js", "6dcb18e42b"],
   ["js/chara.js", "47379dcf34"],
-  ["js/character.js", "3e01d7f376"],
-  ["js/character_nyu.js", "5852150e2a"],
+  ["js/character.js", "f0fea7e739"],
+  ["js/character_nyu.js", "2fe2840f29"],
   ["js/clothes.js", "f2402b204e"],
   ["js/data.js", "ce1fcaf70d"],
-  ["js/link.js", "b47cda6708"],
-  ["js/main.js", "efe107e655"],
+  ["js/link.js", "fba3f5034a"],
+  ["js/main.js", "e676b881f9"],
   ["js/makeup.js", "1cb014dcba"],
   ["js/nyu.js", "dbce41d0a5"],
   ["js/recipes.js", "0c1f702d3e"],
   ["js/screens/cook.js", "f2644fd852"],
   ["js/screens/dress.js", "4bb92b5b26"],
-  ["js/screens/main.js", "c72e0ed2f1"],
-  ["js/state.js", "bb79fbb173"],
+  ["js/screens/main.js", "d26775c9fe"],
+  ["js/state.js", "1fc5af9495"],
   ["js/steps.js", "1d0e870a39"],
   ["js/steps2.js", "f96e423792"],
   ["js/ui.js", "7b01161cdc"],
