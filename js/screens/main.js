@@ -127,8 +127,8 @@ G.Screens.home = {
     const comingSoon = () => { if (!busy) say(L.comingSoon, 'face_prim'); };
     const buttons = [
       { id: 'cook', label: 'つくる', icon: 'icon_cook', fn: () => G.go('recipes') },
-      { id: 'dress', label: 'おしゃれ', icon: 'icon_apron', fn: comingSoon },
-      { id: 'recipes', label: 'レシピ', icon: 'icon_recipe', fn: comingSoon }
+      { id: 'dress', label: 'おしゃれ', icon: 'icon_apron', fn: () => G.go('dress') },
+      { id: 'recipes', label: 'レシピ', icon: 'icon_recipe', fn: () => G.go('book') }
     ];
     if (G.Link.canGoHome()) buttons.push({ id: 'home', label: 'おうち', icon: 'icon_door', fn: comingSoon });
     buttons.forEach((b, i) => {

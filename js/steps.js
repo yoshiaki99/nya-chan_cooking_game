@@ -174,6 +174,21 @@ G.Dish = (function () {
       <ellipse cx="160" cy="140" rx="34" ry="8" fill="#fff" opacity=".45"/>`
   };
 
+  /* おさら（viewBox 0 0 500 360 の 中。まんなか 250,250）。F-70 */
+  function plateSvg(id) {
+    const rim = 'fill="#fff" ' + inkA(6), inner = 'fill="none" stroke="#d9ecf3" stroke-width="8"';
+    const star = (rx, ry) => { let d = ''; for (let i = 0; i < 10; i++) { const t = -Math.PI / 2 + i * Math.PI / 5, k = i % 2 ? 0.55 : 1; d += (i ? 'L' : 'M') + (250 + Math.cos(t) * rx * k).toFixed(1) + ' ' + (250 + Math.sin(t) * ry * k).toFixed(1); } return d + 'Z'; };
+    switch (id) {
+      case 'square': return `<rect x="30" y="160" width="440" height="180" rx="34" ${rim}/><rect x="70" y="182" width="360" height="136" rx="20" ${inner}/>`;
+      case 'heart': return `<path d="M250 352 C40 290 10 190 120 160 C180 146 230 170 250 196 C270 170 320 146 380 160 C490 190 460 290 250 352Z" ${rim}/><path d="M250 320 C100 276 80 210 140 192 C190 180 230 200 250 222 C270 200 310 180 360 192 C420 210 400 276 250 320Z" ${inner}/>`;
+      case 'fish': return `<path d="M400 250 L490 180 L480 250 L490 320Z" ${rim}/><ellipse cx="220" cy="250" rx="210" ry="100" ${rim}/><ellipse cx="220" cy="246" rx="160" ry="70" ${inner}/><circle cx="70" cy="230" r="10" fill="${INK}"/>`;
+      case 'cat': return `<path d="M60 220 L80 120 L160 170Z M440 220 L420 120 L340 170Z" ${rim}/><ellipse cx="250" cy="250" rx="236" ry="104" ${rim}/><ellipse cx="250" cy="246" rx="180" ry="70" ${inner}/>`;
+      case 'star': return `<path d="${star(250, 120)}" ${rim}/><path d="${star(190, 90)}" ${inner}/>`;
+      default: return `<ellipse cx="250" cy="250" rx="240" ry="100" ${rim}/><ellipse cx="250" cy="246" rx="190" ry="70" ${inner}/>`;
+    }
+  }
+  G.Art.plateSwatch = (id) => G.Art.svg('0 70 500 300', plateSvg(id));
+
   /* おさら・お料理・トッピング・ソースを 1まいの 絵に（viewBox 0 0 500 360）
    * deco = { pieces: [{ id, x, y, r }], strokes: [{ c, pts: [[x, y], …] }] } */
   function svgOf(recipeId, data = {}, deco = {}) {
@@ -183,14 +198,13 @@ G.Dish = (function () {
     const strokes = (deco.strokes || []).map(s =>
       `<polyline points="${s.pts.map(q => q.join(',')).join(' ')}" fill="none" stroke="${s.c}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" opacity=".92"/>`).join('');
     return G.Art.svg('0 0 500 360', `
-      <ellipse cx="250" cy="250" rx="240" ry="100" fill="#fff" ${inkA(6)}/>
-      <ellipse cx="250" cy="246" rx="190" ry="70" fill="none" stroke="#d9ecf3" stroke-width="8"/>
+      <g class="dish-plate">${plateSvg(deco.plate)}</g>
       <g class="dish-food"><g transform="translate(50 30)">${food}</g></g>
       <g class="dish-sauce">${strokes}</g>
       <g class="dish-deco">${pieces}</g>`);
   }
 
-  return { svgOf, FILL_COLORS, foods };
+  return { svgOf, plateSvg, FILL_COLORS, foods };
 })();
 
 /* ================= こうてい ================= */

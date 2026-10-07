@@ -157,7 +157,21 @@ G.Accessory = (function () {
     tailbow: (rb) => at(930, 1045, bow(rb, 170), -24),
 
     // みみの リボン（おしゃれの リボン）。結び目が (0, 0)
-    earbow: (rb) => bow(rb, 190)
+    earbow: (rb) => bow(rb, 190),
+
+    // 料理ゲームの ぼうし（要件定義書 5.11 F-A2）
+    chefhat: () => at(615, 190, `
+      <path d="M-150 -30 C-230 -60 -220 -190 -120 -190 C-110 -270 30 -290 60 -210 C120 -280 250 -230 210 -130 C270 -110 250 -20 160 -30 Z" fill="#ffffff" ${L(9)}/>
+      <path d="M-160 -40 Q0 -16 168 -40 L170 40 Q0 64 -170 40Z" fill="#ffffff" ${L(9)}/>
+      <path d="M-60 -130 q20 -40 60 -30 M60 -150 q30 -20 60 10" fill="none" stroke="#e9e0e4" stroke-width="10" stroke-linecap="round"/>`, -4),
+    kerchief: () => at(615, 200, `
+      <path d="M-230 30 C-200 -70 -110 -120 0 -120 C110 -120 200 -70 230 30 Q0 60 -230 30Z" fill="#f6a8c8" ${L(9)}/>
+      ${[[-120, -40], [0, -70], [120, -40], [-60, 10], [60, 10]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="14" fill="#ffffff"/>`).join('')}
+      <path d="M200 20 l70 30 l-20 -60z" fill="#f6a8c8" ${L(8)}/>`, -4),
+    catband: () => at(615, 210, `
+      <path d="M-240 20 Q0 -30 240 20 L236 70 Q0 20 -236 70Z" fill="#9fd0f0" ${L(9)}/>
+      <path d="M-170 10 L-150 -110 L-80 -10Z M170 10 L150 -110 L80 -10Z" fill="#9fd0f0" ${L(9)}/>
+      <path d="M-148 -70 L-140 -20 L-110 -20Z M148 -70 L140 -20 L110 -20Z" fill="#f6a8c8"/>`, -4)
   };
   // リボンの色で 絵が かわるもの
   const BY_RIBBON = { beret: true, tailbow: true, earbow: true };

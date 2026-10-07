@@ -74,6 +74,22 @@ window.G = window.G || {};
       <path d="M50 30 V16" ${ink(6)}/>${shine(34, 48, 6)}`),
     chicken: () => v(`<path d="M20 56 Q18 32 46 30 Q76 28 80 52 Q82 74 52 76 Q22 78 20 56Z" fill="#f8c8b0" ${ink()}/>
       <path d="M34 48 q16 -8 30 4" fill="none" stroke="#fff" stroke-width="4" opacity=".8"/>`),
+    daikon: () => v(`<path d="M30 30 Q50 22 70 30 L64 80 Q50 96 36 80Z" fill="#fffaf0" ${ink()}/>
+      <path d="M40 30 Q34 10 44 8 M50 28 V6 M60 30 Q66 10 58 8" fill="none" stroke="#5aa84e" stroke-width="6" stroke-linecap="round"/>
+      <path d="M40 50 l6 2M54 62 l6 2" ${ink(2.5)}/>`),
+    potato: () => v(`<path d="M18 56 Q16 30 46 28 Q80 26 84 50 Q86 76 54 78 Q20 80 18 56Z" fill="#e2b77a" ${ink()}/>
+      ${[[36, 44], [60, 40], [52, 62], [70, 58]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.5" fill="#a8803e"/>`).join('')}`),
+    pumpkin: () => v(`<path d="M50 30 C20 26 10 50 14 64 C18 82 38 86 50 82 C62 86 82 82 86 64 C90 50 80 26 50 30Z" fill="#5f9a56" ${ink()}/>
+      <path d="M50 30 C40 46 40 70 50 82 M50 30 C60 46 60 70 50 82" fill="none" ${ink(3)}/>
+      <path d="M50 30 Q48 18 56 12" fill="none" stroke="#8a6a4a" stroke-width="6" stroke-linecap="round"/>`),
+    tunafish: () => v(`<path d="M14 64 L26 36 H86 L74 64Z" fill="#e8475a" ${ink()}/><path d="M14 64 V72 H74 L86 44 V36" fill="#c93a4c" ${ink()}/>
+      <path d="M34 44 l8 12M52 44 l8 12" stroke="#f6a0a8" stroke-width="4" stroke-linecap="round"/>`),
+    salmonraw: () => v(`<path d="M14 64 L26 36 H86 L74 64Z" fill="#f8a070" ${ink()}/><path d="M14 64 V72 H74 L86 44 V36" fill="#e9884e" ${ink()}/>
+      <path d="M32 44 l10 14M48 44 l10 14M64 44 l10 14" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8"/>`),
+    seabream: () => v(`<path d="M14 64 L26 36 H86 L74 64Z" fill="#fbe7e4" ${ink()}/><path d="M14 64 V72 H74 L86 44 V36" fill="#f3c8c2" ${ink()}/>
+      <path d="M28 40 H82" stroke="#f08a8a" stroke-width="5"/>`),
+    icing: () => v(`<path d="M30 30 h40 l-6 50 h-28z" fill="#f7a8c8" ${ink()}/><path d="M44 80 l6 12 l6 -12" fill="#fff" ${ink(3)}/>
+      <rect x="28" y="20" width="44" height="12" rx="4" fill="#fff" ${ink(3)}/>`),
     tomatosauce: () => v(`<path d="M36 22 h28 l6 14 v44 q0 8 -8 8 h-24 q-8 0 -8 -8 v-44z" fill="#f05a4e" ${ink()}/>
       <rect x="40" y="10" width="20" height="12" rx="3" fill="#fff" ${ink(3)}/>
       <circle cx="50" cy="58" r="11" fill="#fff" ${ink(3)}/><circle cx="50" cy="59" r="6" fill="#f05a4e"/>`)

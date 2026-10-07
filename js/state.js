@@ -18,18 +18,20 @@ G.State = (function () {
       hearts: 0,      // ぜんぶで ためた ハート（へらない：F-94）
       sent: 0,        // おせわゲームに もう 持ちかえった ハート（F-D4）
       seenStickers: 0,
-      seenRecipes: 0, // あたらしい レシピの おしらせを した ハートの 数
+      seenUnlock: 0,  // あたらしい レシピ・エプロン・ぼうし・おさらの おしらせを した ハートの 数
+      plate: 'round', // さいごに えらんだ おさら
+      together: 0,    // ニャーちゃんも いっしょに たべた 回数（まだ おせわゲームに つたえていない ぶん：F-D8）
       gifts: [],      // とどいた きせつの レシピ・エプロン
       cooked: {},     // レシピの id → 作った 回数
       tummy: 0,       // ニューちゃんが たべた 数（G.TUMMY_FULL で いっぱい：F-85）
       request: null,  // ニューちゃんの リクエスト（レシピの id：F-30）
       firstDone: false, // はじめての おにぎりを 作ったか（F-31）
       safety: {},     // 火・ほうちょうを はじめて つかったときの ひとことを 言ったか（F-6F。1回だけ）
-      // おせわゲームと 同じ しくみ（js/chara.js・js/accessory.js）が 読む おしゃれ。エプロン・ぼうしは 第2段階
+      // おせわゲームと 同じ しくみ（js/chara.js・js/accessory.js）が 読む おしゃれ。エプロン（body）・ぼうし（head）
       ribbon: 'none',
       ribbonSide: 'right',
       makeup: { cheek: null, lip: null, eye: null },
-      wear: { head: null, face: null, neck: null, back: null, tail: null, body: null },
+      wear: { head: 'chefhat', face: null, neck: null, back: null, tail: null, body: 'apron' },
       clothColor: {},
       lastTime: Date.now(),
       lastDay: null,
@@ -56,6 +58,9 @@ G.State = (function () {
       d = raw ? merge(defaults(), JSON.parse(raw)) : defaults();
     } catch (e) { d = defaults(); }
     if (d.request && !G.recipe(d.request)) d.request = null;
+    if (d.seenRecipes != null) { d.seenUnlock = Math.max(d.seenUnlock, d.seenRecipes); delete d.seenRecipes; } // まえの 版の セーブ
+    if (d.wear.body && !G.CLOTHES.some(c => c.id === d.wear.body)) d.wear.body = 'apron';
+    if (d.wear.head && !G.ACCESSORIES.some(c => c.id === d.wear.head)) d.wear.head = 'chefhat';
     catchUp();
     applySettings();
   }
@@ -111,21 +116,27 @@ G.State = (function () {
     return d.request;
   }
   const request = () => d.request;
+  function noteTogether() { d.together++; save(); }
+  const togetherCount = () => d.together;
+  function clearTogether() { d.together = 0; save(); }
   /* はじめての ときだけ true（火・ほうちょうの ひとこと：F-6F） */
   function firstTime(kind) {
     if (d.safety[kind]) return false;
     d.safety[kind] = true; save();
     return true;
   }
-  function takeNewRecipes() {
-    const out = G.RECIPES.filter(r => !r.season && r.unlock > d.seenRecipes && r.unlock <= d.hearts);
-    if (out.length) { d.seenRecipes = Math.max.apply(null, out.map(r => r.unlock)); save(); }
+  /* あたらしく ふえた レシピ・エプロン・ぼうし・おさら（F-92） */
+  function takeNewUnlocks() {
+    const isNew = (x) => !x.season && x.unlock > d.seenUnlock && x.unlock <= d.hearts;
+    const out = { recipes: G.RECIPES.filter(isNew), clothes: G.CLOTHES.filter(isNew), hats: G.ACCESSORIES.filter(isNew), plates: G.PLATES.filter(isNew) };
+    const all = [].concat(out.recipes, out.clothes, out.hats, out.plates);
+    if (all.length) { d.seenUnlock = Math.max.apply(null, all.map(x => x.unlock)); save(); }
     return out;
   }
-  /* その月の きせつの レシピを とどける（とどいたら ずっと 作れる：F-93） */
+  /* その月の きせつの プレゼント（レシピ・エプロン）を とどける（とどいたら ずっと つかえる：F-93） */
   function takeSeasonGifts() {
     const m = new Date().getMonth() + 1;
-    const out = G.RECIPES.filter(r => r.season && r.season.month === m && d.gifts.indexOf(r.id) < 0);
+    const out = G.RECIPES.concat(G.CLOTHES).filter(r => r.season && r.season.month === m && d.gifts.indexOf(r.id) < 0);
     if (out.length) { out.forEach(r => d.gifts.push(r.id)); save(); }
     return out;
   }
@@ -153,6 +164,12 @@ G.State = (function () {
   const makeup = () => d.makeup;
   const wear = () => d.wear;
   const clothes = () => d.wear.body || null;
+  function setWear(slot, id) { d.wear[slot] = id; save(); }
+  const hasItem = (x) => (x.season ? d.gifts.indexOf(x.id) >= 0 : x.unlock <= d.hearts); // エプロン・ぼうし・おさら
+  const clothColorIndex = (id) => d.clothColor[id] || 0;
+  function setClothColor(id, i) { d.clothColor[id] = i; save(); }
+  const plate = () => (G.PLATES.some(p => p.id === d.plate && hasItem(p)) ? d.plate : 'round');
+  function setPlate(id) { d.plate = id; save(); }
   function clothColor(id) {
     const c = G.CLOTHES.find(x => x.id === id);
     return c && c.colors ? c.colors[(d.clothColor[id] || 0) % c.colors.length] : null;
@@ -161,10 +178,24 @@ G.State = (function () {
   function level() { return 0; }
 
   /* ---- しゃしん（大きいので、ふだんのセーブとは べつの場所に しまう） ---- */
+  /* レシピちょうの しゃしん（F-B0〜F-B2）。絵そのものではなく、お料理・もりつけの データを のこして、見るときに 描く（小さく すむ）
+   * { t: とった時刻, r: レシピ, data, deco } */
   const ALBUM_KEY = KEY + '-album';
   function photos() {
     try { const raw = localStorage.getItem(ALBUM_KEY); return raw ? JSON.parse(raw) : []; } catch (e) { return []; }
   }
+  function writePhotos(list) { try { localStorage.setItem(ALBUM_KEY, JSON.stringify(list)); return true; } catch (e) { return false; } }
+  /* 1まい のこす。30まいを こえたら 古いものから はずす。ただし レシピごとに いちばん新しい 1まいは のこす（F-B1） */
+  function addPhoto(entry) {
+    const list = photos();
+    list.push(entry);
+    while (list.length > G.PHOTO_MAX) {
+      const i = list.findIndex(p => list.some(q => q !== p && q.r === p.r && q.t > p.t));
+      list.splice(i >= 0 ? i : 0, 1);
+    }
+    while (!writePhotos(list) && list.length > 1) list.shift();
+  }
+  function removePhoto(t) { writePhotos(photos().filter(p => p.t !== t)); }
 
   /* ---- 毎日 ---- */
   const isNewDay = () => d.lastDay !== today();
@@ -202,9 +233,10 @@ G.State = (function () {
   return {
     load, save, saveNow, hasSave, tick, catchUp,
     tummy, tummyPlates, isFull, eat,
-    hasRecipe, recipes, markCooked, cookedCount, nextRequest, request, firstTime, takeNewRecipes, takeSeasonGifts,
+    hasRecipe, recipes, markCooked, cookedCount, nextRequest, request, firstTime, noteTogether, togetherCount, clearTogether, takeNewUnlocks, takeSeasonGifts,
     addHearts, hearts, unsentHearts, markSent, stickerCount, takeNewStickers, heartsToNextSticker,
-    ribbon, ribbonSide, makeup, wear, clothes, clothColor, addMeter, level, photos,
+    ribbon, ribbonSide, makeup, wear, clothes, clothColor, clothColorIndex, setClothColor, setWear, hasItem, plate, setPlate,
+    addMeter, level, photos, addPhoto, removePhoto,
     isNewDay, markDay, pet, playSecToday, overLimit, settings, setSetting, reset
   };
 })();

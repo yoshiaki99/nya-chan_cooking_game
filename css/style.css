@@ -777,3 +777,44 @@ body.portrait #stage { visibility: hidden; }
 /* おりょうり中は ふきだしが 作業場の タッチを じゃましないように */
 .screen-cook .bubble, .screen-eat .bubble { pointer-events: none; }
 .bubble.narrow .bubble-text { max-width: 340px; }
+.plate-btn { background: #fff; border-radius: 24px; box-shadow: 0 0 0 4px #f3d9df, 0 6px 0 4px rgba(201, 95, 127, .15); padding: 8px 12px; z-index: 4; transition: transform .12s; }
+.plate-btn svg { width: 100%; height: 100%; display: block; }
+.plate-btn.sel { box-shadow: 0 0 0 7px var(--gold), 0 0 26px 8px rgba(255, 220, 130, .85); }
+.plate-btn.pressed { transform: scale(.9); }
+.photo-flash { position: absolute; inset: 0; background: #fff; animation: flashOut .6s ease-out forwards; pointer-events: none; }
+@keyframes flashOut { from { opacity: .95; } to { opacity: 0; } }
+
+/* おしゃれ（エプロン・ぼうし） */
+.apron-panel { z-index: 3; }
+.apron-panel > * { position: absolute; }
+.dress-tab { background: #fff; border-radius: 30px; box-shadow: 0 0 0 4px #f3d9df, 0 6px 0 4px rgba(201, 95, 127, .15); transition: transform .12s; }
+.dress-tab.sel { box-shadow: 0 0 0 7px var(--gold), 0 0 26px 8px rgba(255, 220, 130, .85); }
+.dress-tab.pressed { transform: scale(.92); }
+.dress-tab .dt-art { position: absolute; left: 12px; top: 10px; width: 100px; height: 100px; object-fit: contain; pointer-events: none; }
+.dress-tab .dt-label { position: absolute; left: 112px; top: 36px; font-size: 32px; color: #5a4148; pointer-events: none; white-space: nowrap; }
+.apron-panel .swatch .sw-art { left: 15px; top: 12px; width: 140px; height: 140px; object-fit: contain; }
+.sw-none { display: flex; align-items: center; justify-content: center; font-size: 80px; color: #d9c2c8; }
+.color-dot { border-radius: 50%; border: 6px solid #fff; box-shadow: 0 0 0 4px #f3d9df; transition: transform .12s; }
+.color-dot.sel { box-shadow: 0 0 0 7px var(--gold), 0 0 22px 6px rgba(255, 220, 130, .85); }
+.color-dot.pressed { transform: scale(.9); }
+
+/* レシピちょう */
+.rc-pan.gold svg { filter: sepia(1) saturate(4) hue-rotate(5deg) brightness(1.1); }
+.book-card .rc-art { left: 10px; width: 280px; }
+.book-page { background: #fffaf3; border-radius: 40px; box-shadow: 0 0 0 6px #fff, 0 0 0 11px #f3d9df, 0 16px 30px rgba(120, 60, 70, .2); }
+.bk-title { font-size: 56px; color: var(--rose); letter-spacing: .08em; }
+.bk-photo { background: #fdf3e7; border-radius: 30px; }
+.bk-photo svg, .bk-thumb svg, .bk-nophoto svg, .bk-trash svg, .bk-ing-art svg { width: 100%; height: 100%; display: block; }
+.bk-nophoto { width: 100%; height: 100%; opacity: .3; }
+.bk-thumb { background: #fdf3e7; border-radius: 14px; box-shadow: 0 0 0 3px #f3d9df; transition: transform .12s; }
+.bk-thumb.sel { box-shadow: 0 0 0 5px var(--gold); }
+.bk-thumb.pressed, .bk-trash.pressed { transform: scale(.9); }
+.bk-trash { background: #fff; border-radius: 50%; padding: 14px; box-shadow: 0 0 0 4px #f3d9df, 0 6px 0 4px rgba(201, 95, 127, .15); transition: transform .12s; }
+.bk-side { color: #5a4148; font-size: 30px; }
+.bk-h { font-size: 32px; color: var(--rose); margin: 6px 0 10px; }
+.bk-ings { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-bottom: 18px; }
+.bk-ing { width: 120px; text-align: center; font-size: 22px; white-space: nowrap; }
+.bk-ing-art { width: 80px; height: 80px; margin: 0 auto; }
+.bk-steps { margin: 0 0 18px 1.4em; padding: 0; line-height: 1.5; }
+.bk-stamps { display: flex; gap: 4px; flex-wrap: wrap; }
+.bk-cook { font-size: 48px; }

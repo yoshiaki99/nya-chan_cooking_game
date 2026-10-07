@@ -299,7 +299,7 @@ G.Screens.cook = {
 
     /* ---------- ③ もりつけ・デコレーション（5.7） ---------- */
     async function decorate() {
-      const deco = { pieces: [], strokes: [] };
+      const deco = { pieces: [], strokes: [], plate: S.plate() };
       const root = UI.el('div', 'deco');
       UI.pos(root, 0, 0, 1366, 1024);
       scr.appendChild(root);
@@ -362,7 +362,7 @@ G.Screens.cook = {
         const a = Math.random() * Math.PI * 2, r = 0.25 + Math.random() * 0.6;
         return { x: 250 + Math.cos(a) * 200 * r, y: 225 + Math.sin(a) * 100 * r };
       };
-      const sauceColor = (id) => ({ honey: '#f2b84a', tomatosauce: '#e8473c' })[id] || '#f2b84a';
+      const sauceColor = (id) => ({ honey: '#f2b84a', tomatosauce: '#e8473c', icing: '#f7a8c8' })[id] || '#f2b84a';
       function addPiece(id, q) {
         if (deco.pieces.length >= 30) { G.Sound.play('soft'); return; } // たくさん おいても おそくならないように（F-76）
         deco.pieces.push({ id, x: Math.round(q.x), y: Math.round(q.y), r: Math.round((Math.random() - 0.5) * 40) });
@@ -407,6 +407,21 @@ G.Screens.cook = {
       sc.on(plate, 'pointerup', endDraw);
       sc.on(plate, 'pointercancel', endDraw);
 
+      // おさらを えらぶ（右。もっている ものだけ：F-70）
+      const plates = G.PLATES.filter(p => S.hasItem(p));
+      if (plates.length > 1) {
+        const pbtns = plates.map((pl, i) => {
+          const b = UI.el('div', 'plate-btn' + (pl.id === deco.plate ? ' sel' : ''), G.Art.plateSwatch(pl.id));
+          UI.pos(b, 1180, 200 + i * 100, 150, 86);
+          root.appendChild(b);
+          UI.tap(b, () => {
+            deco.plate = pl.id; S.setPlate(pl.id); redraw();
+            pbtns.forEach(x => x.classList.toggle('sel', x === b));
+          }, { sound: 'place', say: pl.label });
+          return b;
+        });
+      }
+
       // ふきん（ぜんぶ やりなおし）
       const cloth = UI.el('div', 'deco-tool cloth', G.Art.svg('0 0 100 100', `<path d="M16 30 Q50 14 84 30 L78 78 Q50 90 22 78Z" fill="#9ccdf0" stroke="#3b3236" stroke-width="4" stroke-linejoin="round"/><path d="M26 44 h48M28 60 h44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`));
       UI.pos(cloth, startX + tools.length * 130 + 20, 850, 116, 116);
@@ -432,6 +447,13 @@ G.Screens.cook = {
       UI.sparkles(750, 430, 16, 300);
       G.Sound.play('fanfare');
       await say(L.decoDone, 'face_happy');
+      // しゃしんを とって レシピちょうに のこす（F-74）
+      const flash = UI.el('div', 'photo-flash');
+      document.querySelector('#fx').appendChild(flash);
+      G.Sound.play('shutter');
+      setTimeout(() => flash.remove(), 600);
+      S.addPhoto({ t: Date.now(), r: recipe.id, data, deco });
+      await say(L.photoSaved, 'face_happy');
       return deco;
     }
 
@@ -496,21 +518,43 @@ G.Screens.eat = {
         const h = nyu.point(0.5, 0.3);
         UI.giveHearts(1, h.x, h.y);
       } else {
-        await say(L.serve, 'face_happy');
+        /* ときどき ニャーちゃんも いっしょに たべる（F-88・F-89）。1日の さいしょの 1品・おさかな・ケーキの ときは 出やすい */
+        const likely = S.tummy() < 0.1 || ['grillfish', 'sushi', 'cake', 'xmascake'].indexOf(recipe.id) >= 0;
+        const together = params.together != null ? params.together : Math.random() < (likely ? 0.6 : 0.3);
+        let dish2 = null;
+        if (together) {
+          await say(L.together, 'face_happy');
+          await sayNyu(N.togetherYay, 'happy');
+          await sc.guard(chara.moveTo(1060, 700, 1100));
+          dish2 = UI.el('div', 'eat-dish', G.Dish.svgOf(recipe.id, params.data || {}, deco));
+          UI.pos(dish2, 1060 - 150, 476, 300, 216);
+          scr.appendChild(dish2);
+          dish2.animate([{ opacity: 0, transform: 'translateY(-30px)' }, { opacity: 1, transform: 'none' }], { duration: 400 });
+          G.Sound.play('place');
+          await sc.wait(500);
+        } else await say(L.serve, 'face_happy');
         await sayNyu(N.itadaki, 'happy');
         /* もぐもぐ：3かいで たべおわる */
-        const food = dish.querySelector('.dish-food'), dec = dish.querySelector('.dish-deco'), sau = dish.querySelector('.dish-sauce');
-        [food, dec, sau].forEach(g => { if (g) { g.style.transformBox = 'fill-box'; g.style.transformOrigin = 'center bottom'; g.style.transition = 'transform .4s, opacity .4s'; } });
+        const parts = [dish, dish2].filter(Boolean).flatMap(dd => ['.dish-food', '.dish-deco', '.dish-sauce'].map(q => dd.querySelector(q))).filter(Boolean);
+        parts.forEach(g => { g.style.transformBox = 'fill-box'; g.style.transformOrigin = 'center bottom'; g.style.transition = 'transform .4s, opacity .4s'; });
         for (let i = 1; i <= 3; i++) {
           nyu.flash('happy', 700);
           nyu.hop();
+          if (together) { chara.flash('face_happy', 700); chara.hop(20); }
           G.Sound.play('munch');
           const p = nyu.point(0.5, 0.35);
           UI.word('もぐもぐ', p.x + 150, p.y, '#c95f7f', 40);
           const s = 1 - i / 3;
-          [food, dec, sau].forEach(g => { if (g) { g.style.transform = `scale(${Math.max(0.001, s)})`; g.style.opacity = String(s > 0 ? 1 : 0); } });
+          parts.forEach(g => { g.style.transform = `scale(${Math.max(0.001, s)})`; g.style.opacity = String(s > 0 ? 1 : 0); });
           if (i === 2) sayNyu(pick(N.munch));
           await sc.wait(900);
+        }
+        if (together) {
+          await say(L.togetherYum, 'face_happy');
+          await sayNyu(N.togetherYum, 'happy');
+          S.noteTogether();
+          const hc = chara.point(0.5, 0.2);
+          UI.giveHearts(1, hc.x, hc.y); // なかよし ハート（F-89）
         }
         S.eat();
         /* よろこぶ（お料理ごと・デコレーションごとの ひとこと：F-82） */
@@ -518,7 +562,7 @@ G.Screens.eat = {
         const h = nyu.point(0.5, 0.2);
         UI.hearts(h.x, h.y, 6);
         UI.sparkles(h.x, h.y, 10, 200);
-        const fav = ['pancake', 'grillfish'].indexOf(recipe.id) >= 0;
+        const fav = ['pancake', 'grillfish', 'sushi'].indexOf(recipe.id) >= 0; // ニューちゃんの だいこうぶつ（ホットケーキ・おさかな）
         const comment = fav ? N.favorite : deco.strokes.length ? N.decoDraw : deco.pieces.length >= 10 ? N.decoMany : pick(N.yum);
         await sayNyu(comment, 'dreamy');
         if (isRequest) await sayNyu(N.remember, 'happy');

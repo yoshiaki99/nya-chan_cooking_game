@@ -60,20 +60,21 @@ G.Screens = G.Screens || {};
   G.checkRewards = async function () {
     if (rewarding) return false;
     const stickers = G.State.takeNewStickers();
-    const recipes = G.State.takeNewRecipes();
+    const un = G.State.takeNewUnlocks();
     const gifts = G.State.takeSeasonGifts();
-    if (!stickers.length && !recipes.length && !gifts.length) return false;
+    if (!stickers.length && !un.recipes.length && !un.clothes.length && !un.hats.length && !un.plates.length && !gifts.length) return false;
     rewarding = true;
     const L = G.CHARACTER.lines;
     for (const i of stickers) {
       const s = G.STICKERS[i];
       await UI.popup({ art: `<div class="sticker big"><span>${s.e}</span></div>`, title: 'シールを もらったよ！', speak: 'シールを もらったよ！ ' + s.label });
     }
-    for (const r of recipes) {
-      await UI.popup({ art: G.Art.dish(r.id), title: 'あたらしい レシピ！', speak: r.label + '！ ' + L.unlockRecipe });
-    }
+    for (const r of un.recipes) await UI.popup({ art: G.Art.dish(r.id), title: 'あたらしい レシピ！', speak: r.label + '！ ' + L.unlockRecipe });
+    for (const c of un.clothes.concat(un.hats)) await UI.popup({ art: G.Accessory.swatch(c.id), title: 'あたらしい おしゃれ！', speak: c.label + '！ ' + L.unlockDress });
+    for (const p of un.plates) await UI.popup({ art: G.Art.plateSwatch(p.id), title: 'あたらしい おさら！', speak: p.label + '！ ' + L.unlockPlate });
     for (const r of gifts) { // きせつの プレゼント
-      await UI.popup({ art: G.Art.dish(r.id), title: r.season.name + 'の プレゼント！', speak: r.season.name + 'の ' + r.label + '！ ' + L.giftRecipe });
+      const art = G.recipe(r.id) ? G.Art.dish(r.id) : G.Accessory.swatch(r.id);
+      await UI.popup({ art, title: r.season.name + 'の プレゼント！', speak: r.season.name + 'の ' + r.label + '！ ' + L.giftRecipe });
     }
     rewarding = false;
     return true;
