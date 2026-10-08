@@ -130,7 +130,8 @@ G.Screens = G.Screens || {};
           <p class="note">「${G.CHARACTER.title}」は、白いネコの${G.CHARACTER.name}になって、いろいろなお料理を作り、妹のニューちゃんに食べてもらう、小さなお子さま向けの無料のゲームです。失敗や罰はありません。ネコの体に悪いとされる食べもの（ねぎ類・チョコレートなど）は登場しません。</p>
           <p class="note"><b>ほんとうの料理について</b>：ゲームの中の料理は、遊びのために簡単にしてあります。火や包丁は、おとなの方と一緒に使うようにお声がけください。</p>
           <p class="note"><b>プライバシー</b>：名前などの個人情報は集めません。広告・課金・アクセス解析はありません。遊んだ記録（ハート・シール・レシピ・写真など）は、この端末のブラウザの中だけに保存され、外には送られません。</p>
-          <p class="note">${G.CHARACTER.credit}</p></section>
+          <p class="note">${G.CHARACTER.credit}</p>
+          <p class="note">最終更新：${G.BUILD_INFO ? G.BUILD_INFO.label : '（開発用の版のため、ありません）'}</p></section>
         <button class="close" data-act="close">閉じる</button>
       </div>`;
     ov.appendChild(wrap);

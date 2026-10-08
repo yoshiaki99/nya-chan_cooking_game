@@ -34,7 +34,9 @@ python3 -m http.server 8776
 1. `node tools/check_lines.js` … セリフが、すべて最後に「ニャー」で終わっているか・漢字が入っていないかを確かめる
 2. `node tools/check_foods.js` … ネコの体に悪い食べものが、ざいりょう・レシピ・シール・セリフに出ていないかを確かめる
 3. `node tools/check_svg.js` … ゲームの中で描く絵（SVG）が こわれていないかを確かめる
-4. `python3 tools/build.py --out _site` … オフライン用のファイル一覧（`sw.js`）を作りなおし、公開するファイルだけを `_site` にそろえる
+4. `python3 tools/build.py --out _site` … 最終更新の日時（`js/build_info.js`。最後のコミットの日時を日本時間で）を作り、オフライン用のファイル一覧（`sw.js`）を作りなおし、公開するファイルだけを `_site` にそろえる
+
+`js/build_info.js` は、保護者メニューの「このゲームについて」に出す「最終更新」の日時です。`--out` のときだけ作り、リポジトリには入れません（`.gitignore`）。ふだんの `python3 tools/build.py` では `sw.js` の一覧にも入れません（コミットのたびに `sw.js` が変わらないように）。ビルドしていない開発用の版では「（開発用の版のため、ありません）」と出ます。
 
 ### おせわゲームと同じサイトに置くので
 
@@ -50,7 +52,7 @@ python3 -m http.server 8776
 
 | ファイル | すること |
 |---|---|
-| `build.py` | `sw.js` の一覧と、実際にある絵・声の一覧（`js/asset_list.js`）を作りなおす。**絵を足したり消したりしたら動かす** |
+| `build.py` | `sw.js` の一覧と、実際にある絵・声の一覧（`js/asset_list.js`）を作りなおす。**絵を足したり消したりしたら動かす**。`--out` のときは最終更新の日時（`js/build_info.js`）も作る |
 | `check_lines.js` | セリフの決まり（最後に「ニャー」・1回だけ・漢字なし）を確かめる |
 | `check_foods.js` | ネコの体に悪い食べもの（`js/recipes.js` の `G.NG_FOODS`）が出ていないかを確かめる |
 | `check_svg.js` | ゲームの中で描く絵（SVG）に、同じ属性が2つないかを確かめる |
