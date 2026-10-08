@@ -511,7 +511,11 @@ def main():
 
     # ふつうは1つずつ作る。--batch 8 のようにすると、話し方の指示が同じ文をまとめて1回で読ませ、あとで無音で切りわける
     # （1日 100回の上限を節約できるが、区切りがずれることがある。ずれたものは確かめのときに消される）
-    pending = [(k, t) for k, t in todo if not os.path.exists(os.path.join(WAV, k + '.wav'))]
+    # もとの WAV が無く、m4a だけ ある 声（おせわゲームから 文ごと 写した もの）は、対応表の 文と 同じなら そのまま 使う
+    copied = {k for k, t in todo
+              if not os.path.exists(os.path.join(WAV, k + '.wav')) and os.path.exists(os.path.join(OUT, k + '.m4a'))
+              and old.get(k) == t}
+    pending = [(k, t) for k, t in todo if k not in copied and not os.path.exists(os.path.join(WAV, k + '.wav'))]
     if '--only' in sys.argv:  # --only m_ ならセリフだけ、--only g_ ならボタンなどの名前だけ作る
         pending = [(k, t) for k, t in pending if k.startswith(sys.argv[sys.argv.index('--only') + 1])]
     if '--list' not in sys.argv and pending:
@@ -569,6 +573,9 @@ def main():
     done = []
     for k, t in todo:
         w, m = os.path.join(WAV, k + '.wav'), os.path.join(OUT, k + '.m4a')
+        if k in copied:
+            done.append((k, t))
+            continue
         if not os.path.exists(w):
             continue
         if not os.path.exists(m) or os.path.getmtime(m) < os.path.getmtime(w):
