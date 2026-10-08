@@ -4,6 +4,9 @@
 # 公開用に そろえた ファイル（tools/build.py --out _site）
 _site/
 
+# 最終更新の 日時（tools/build.py --out が 作る。コミットの たびに 変わるので 入れない）
+js/build_info.js
+
 # 声を作るときの もとの WAV（大きいので入れない。要件定義書 N-54）
 tools/voice_wav/
 

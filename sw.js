@@ -4,9 +4,9 @@
  * ・新しい版が公開されると、次に開いたときに、変わったファイルだけを受け取って入れかわる。
  * 下の VERSION と FILES は tools/build.py が自動で書きかえるので、手で直さなくてよい。 */
 /* @@FILES-BEGIN */
-const VERSION = '10cd2a7d83';
+const VERSION = '8816ae3cd0';
 const FILES = [
-  ["index.html", "c7db3f8838"],
+  ["index.html", "64bc28997f"],
   ["assets/characters/nya_act_bath_fluffy.png", "81401cdcec"],
   ["assets/characters/nya_act_bath_foam.png", "fdbed4afb1"],
   ["assets/characters/nya_act_eat.png", "f029eafb01"],
@@ -52,7 +52,7 @@ const FILES = [
   ["js/clothes.js", "f2402b204e"],
   ["js/data.js", "ce1fcaf70d"],
   ["js/link.js", "fba3f5034a"],
-  ["js/main.js", "e676b881f9"],
+  ["js/main.js", "7eadf3177f"],
   ["js/makeup.js", "1cb014dcba"],
   ["js/nyu.js", "dbce41d0a5"],
   ["js/recipes.js", "0c1f702d3e"],
