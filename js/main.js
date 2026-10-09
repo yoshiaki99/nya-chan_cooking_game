@@ -174,6 +174,9 @@ G.Screens = G.Screens || {};
       wrap.classList.remove('show');
       setTimeout(() => wrap.remove(), 250);
       parentOpen = false;
+      // 開いている あいだに 新しい版に 入れかわっていたら、ここで 読みこみ直す
+      // （歯車は タイトル・キッチンに しか ないので、遊んでいる とちゅうでは ない）
+      if (Offline.updateReady) { G.State.saveNow(); location.reload(); return; }
       lastTick = Date.now();
       if (currentName === 'home' && current.onTick) current.onTick();
     }
@@ -278,7 +281,7 @@ G.Screens = G.Screens || {};
       if (m.type === 'offline-version') { O.version = m.version; O.total = m.total; changed(); }
     });
     // 新しい版に入れかわったら読みこみ直す。タイトル・おしまいの画面にいるときは すぐ、
-    // あそんでいる とちゅうなら、次にアプリを開いたとき（またはタイトルに戻ったとき）
+    // あそんでいる とちゅうなら、次にアプリを開いたとき（またはタイトルに戻ったとき・保護者メニューを閉じたとき）
     const idle = () => { const n = G.currentScreen(); return !n || n === 'title' || n === 'end'; };
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (!hadController) return;
@@ -297,7 +300,9 @@ G.Screens = G.Screens || {};
       const refresh = () => {
         O.state = reg.active ? 'ready' : (reg.installing || reg.waiting ? 'loading' : 'error');
         O.updating = !!(reg.active && reg.installing);
-        if (reg.active) reg.active.postMessage('offline-version');
+        // 新しい版を 受け取っている とちゅうは、古い版に 話しかけない（話しかけると、入れかわりが 止まって しまう）。
+        // 入れかわったら、新しい版の ほうから 版を 知らせてくる
+        if (reg.active && !reg.installing && !reg.waiting) reg.active.postMessage('offline-version');
         changed();
       };
       const watch = (w) => { if (w) w.addEventListener('statechange', refresh); };
