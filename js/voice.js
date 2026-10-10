@@ -113,9 +113,18 @@ G.Voice = (function () {
     if (!enabled || volume <= 0) return new Promise(r => setTimeout(r, fallbackMs));
     // ニューちゃんの声は「nyu:」をつけた文で さがす（ニャーちゃんと 同じ文でも、べつの声で 鳴らすため）
     const src = clips[norm((who === 'nyu' ? 'nyu:' : '') + text)];
-    if (src && G.Sound.ready()) {
-      // 録音が読めなかったとき（ファイルが無いなど）は、ブラウザの読み上げに切りかえる
-      return playClip(src, my).catch(() => (my === token ? synthSpeak(text, who, my, fallbackMs) : undefined));
+    const ctx = G.Sound.context();
+    if (src && ctx) {
+      // 音の しくみが 止まっている とき（アプリを 切りかえた あと・iPad の 読み上げや 電話の あと など）は、
+      // もう一度 動かしてから 録音を 鳴らす。ブラウザの 読み上げに 切りかえると、声も 音量も かわって しまう ため
+      const wake = ctx.state === 'running' ? Promise.resolve()
+        : Promise.race([ctx.resume().catch(() => {}), new Promise(r => setTimeout(r, 700))]);
+      return wake.then(() => {
+        if (my !== token) return undefined;
+        if (!G.Sound.ready()) return synthSpeak(text, who, my, fallbackMs); // どうしても 動かない ときだけ
+        // 録音が読めなかったとき（ファイルが無いなど）は、ブラウザの読み上げに切りかえる
+        return playClip(src, my).catch(() => (my === token ? synthSpeak(text, who, my, fallbackMs) : undefined));
+      });
     }
     return synthSpeak(text, who, my, fallbackMs);
   }
