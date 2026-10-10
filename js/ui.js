@@ -95,10 +95,17 @@ G.UI = (function () {
       this.text.textContent = text;
       this.el.classList.remove('show');
       this.el.style.left = this.ax + 'px';
+      this.el.style.top = this.ay + 'px';
       this.text.style.maxWidth = '';
       void this.el.offsetWidth;
       // 画面からはみ出すときは、まず幅をせまくして改行する（ニャーちゃんの顔に重ねないため）
       const PAD = 16;
+      const lift = this.side === 'top' ? 28 : 0; // 上に出すときは しっぽの ぶん さらに 上
+      const overTop = () => PAD - (this.ay - lift - this.el.offsetHeight);
+      // 上に出す ふきだしが 画面の 上に はみ出すときは、横に ひろげて 行を へらす（narrow は まわりに かさねないため ひろげない）
+      if (this.side === 'top' && overTop() > 0 && !this.el.classList.contains('narrow')) {
+        this.text.style.maxWidth = (W - PAD * 2) + 'px';
+      }
       let w = this.el.offsetWidth;
       if (this.side === 'top') {
         const half = w / 2;
@@ -115,6 +122,9 @@ G.UI = (function () {
           if (over > 0) this.el.style.left = (this.ax - over) + 'px';
         }
       }
+      // それでも 上に はみ出すときは、文字が 切れないように 下へ ずらす
+      const down = overTop();
+      if (down > 0) this.el.style.top = (this.ay + down) + 'px';
       this.el.classList.add('show');
       const p = G.Voice.speak(text, opts.who || 'chara');
       return p.then(() => new Promise(r => setTimeout(r, opts.hold != null ? opts.hold : 1400))).then(() => {

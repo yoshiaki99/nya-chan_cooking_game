@@ -4,7 +4,7 @@
  * ・新しい版が公開されると、次に開いたときに、変わったファイルだけを受け取って入れかわる。
  * 下の VERSION と FILES は tools/build.py が自動で書きかえるので、手で直さなくてよい。 */
 /* @@FILES-BEGIN */
-const VERSION = '6f746eab87';
+const VERSION = '26bf4445b2';
 const FILES = [
   ["index.html", "64bc28997f"],
   ["assets/characters/nya_act_bath_fluffy.png", "81401cdcec"],
@@ -325,7 +325,7 @@ const FILES = [
   ["assets/voice/n_yum_1.m4a", "e57f1ee2ac"],
   ["assets/voice/n_yum_2.m4a", "0ef67f0f7c"],
   ["assets/voice/n_yum_3.m4a", "6af77855ad"],
-  ["css/style.css", "a18e96d754"],
+  ["css/style.css", "0c2dc021af"],
   ["icons/apple-touch-icon.png", "945d5717c3"],
   ["icons/icon-192.png", "f648e4cac7"],
   ["icons/icon-512.png", "1b9afb9000"],
@@ -353,7 +353,7 @@ const FILES = [
   ["js/state.js", "1fc5af9495"],
   ["js/steps.js", "1d0e870a39"],
   ["js/steps2.js", "f96e423792"],
-  ["js/ui.js", "7b01161cdc"],
+  ["js/ui.js", "6e93c4d00e"],
   ["js/voice.js", "eafb619e48"],
   ["js/voice_clips.js", "bf15eef254"],
   ["manifest.webmanifest", "d287190fa4"]
