@@ -37,7 +37,7 @@ G.Screens.recipes = {
       UI.tap(card, () => {
         if (!has) {
           if (r.season) say(r.season.when + 'に とどく ニャー！');
-          else say('ハートが あと ' + Math.max(0, r.unlock - S.hearts()) + 'こ たまったら つくれる ニャー！');
+          else say(G.CHARACTER.lines.lockRecipe);
           return;
         }
         if (!r.ready) { say(L.comingSoon); return; }

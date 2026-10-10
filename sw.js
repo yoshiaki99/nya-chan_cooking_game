@@ -4,7 +4,7 @@
  * ・新しい版が公開されると、次に開いたときに、変わったファイルだけを受け取って入れかわる。
  * 下の VERSION と FILES は tools/build.py が自動で書きかえるので、手で直さなくてよい。 */
 /* @@FILES-BEGIN */
-const VERSION = '3726d3d11d';
+const VERSION = '6f746eab87';
 const FILES = [
   ["index.html", "64bc28997f"],
   ["assets/characters/nya_act_bath_fluffy.png", "81401cdcec"],
@@ -210,12 +210,15 @@ const FILES = [
   ["assets/voice/m_gift_santaapron.m4a", "4bba8c5b6e"],
   ["assets/voice/m_gift_witchapron.m4a", "07c17c47e2"],
   ["assets/voice/m_gift_xmascake.m4a", "72e4ee9c69"],
+  ["assets/voice/m_goHomeHearts.m4a", "7f06d1af40"],
   ["assets/voice/m_goHomeNone.m4a", "51f07b2b8b"],
   ["assets/voice/m_greetAgain_1.m4a", "dba4e7dce1"],
   ["assets/voice/m_greetAgain_2.m4a", "7c86cfb549"],
   ["assets/voice/m_greetDaily.m4a", "82ae286b7e"],
   ["assets/voice/m_kneadIntro.m4a", "1476d46787"],
   ["assets/voice/m_limit.m4a", "f03841e8d2"],
+  ["assets/voice/m_lockDress.m4a", "abb546dab0"],
+  ["assets/voice/m_lockRecipe.m4a", "952cbc86c8"],
   ["assets/voice/m_make_cake.m4a", "e2904b7f82"],
   ["assets/voice/m_make_cookie.m4a", "7dd2c87c99"],
   ["assets/voice/m_make_curry.m4a", "8e341bef59"],
@@ -331,11 +334,11 @@ const FILES = [
   ["js/art.js", "142c4f87e9"],
   ["js/art_food.js", "0fbaef392e"],
   ["js/art_kitchen.js", "4d9c2df5a4"],
-  ["js/asset_list.js", "e1dca50029"],
+  ["js/asset_list.js", "ae64eb2cf1"],
   ["js/assets.js", "44269b1a2d"],
   ["js/audio.js", "6dcb18e42b"],
   ["js/chara.js", "47379dcf34"],
-  ["js/character.js", "f0fea7e739"],
+  ["js/character.js", "1e90af7ec0"],
   ["js/character_nyu.js", "2fe2840f29"],
   ["js/clothes.js", "f2402b204e"],
   ["js/data.js", "ce1fcaf70d"],
@@ -344,15 +347,15 @@ const FILES = [
   ["js/makeup.js", "1cb014dcba"],
   ["js/nyu.js", "dbce41d0a5"],
   ["js/recipes.js", "0c1f702d3e"],
-  ["js/screens/cook.js", "f2644fd852"],
-  ["js/screens/dress.js", "4bb92b5b26"],
-  ["js/screens/main.js", "d26775c9fe"],
+  ["js/screens/cook.js", "f638c3b4c7"],
+  ["js/screens/dress.js", "eef3557581"],
+  ["js/screens/main.js", "922240d301"],
   ["js/state.js", "1fc5af9495"],
   ["js/steps.js", "1d0e870a39"],
   ["js/steps2.js", "f96e423792"],
   ["js/ui.js", "7b01161cdc"],
   ["js/voice.js", "eafb619e48"],
-  ["js/voice_clips.js", "33c95db1b2"],
+  ["js/voice_clips.js", "bf15eef254"],
   ["manifest.webmanifest", "d287190fa4"]
 ];
 /* @@FILES-END */

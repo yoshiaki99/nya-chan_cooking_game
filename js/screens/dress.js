@@ -68,7 +68,7 @@ G.Screens.dress = {
         UI.pos(c, 720 + col * 200 + (row ? 100 : 0), 220 + row * 230, 170, 170);
         panel.appendChild(c);
         UI.tap(c, () => {
-          if (!has) { say(it.season ? it.season.when + 'に とどく ニャー！' : 'ハートが あと ' + Math.max(0, it.unlock - S.hearts()) + 'こ たまったら きられる ニャー！'); return; }
+          if (!has) { say(it.season ? it.season.when + 'に とどく ニャー！' : G.CHARACTER.lines.lockDress); return; }
           S.setWear(this.tab, it.id);
           chara.redraw();
           chara.hop(30);

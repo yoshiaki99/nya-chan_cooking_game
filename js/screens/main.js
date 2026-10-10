@@ -146,7 +146,7 @@ G.Screens.home = {
       if (!(await G.Link.osewaReachable())) { await say(L.offlineHome, 'face_prim'); busy = false; return; }
       const n = S.unsentHearts();
       chara.hop(36);
-      const talk = say(n ? 'ハートを ' + n + 'こ もってかえる ニャー！' : L.goHomeNone, 'face_happy');
+      const talk = say(n ? L.goHomeHearts : L.goHomeNone, 'face_happy');
       sayNyu(N.byeHome, 'happy');
       const sent = G.Link.sendHome();
       const door = scr.querySelector('.care-home');
