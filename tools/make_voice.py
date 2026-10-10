@@ -193,6 +193,10 @@ NAME_READING = {
     'まぐろ': 'マグロ', 'たい': '鯛', 'いちごジャム': 'イチゴジャム',
     'やきざかな': '焼き魚', 'おすし': 'お寿司', 'いちごの ケーキ': 'いちごのケーキ', 'かぼちゃの パイ': 'かぼちゃのパイ',
     'めだまやき': '目玉焼き',
+    # ---- おりょうりゲーム：ホームの ボタン・おさら ----
+    'つくる': '作る',
+    'まるい おさら': '丸いお皿', 'しかくい おさら': '四角いお皿', 'ハートの おさら': 'ハートのお皿',
+    'おさかなの おさら': 'お魚のお皿', 'ネコの おさら': '猫のお皿', 'おほしさまの おさら': 'お星さまのお皿',
 }
 # 月（アクセサリーの「じゅうがつに なったら …」）
 MONTH_READING = {'じゅうがつ': '十月', 'じゅうにがつ': '十二月'}
@@ -273,7 +277,7 @@ def collect():
     for var, pre in (('CARES', 'care'), ('FOODS', 'food'), ('SOAPS', 'soap'), ('BATH_TOYS', 'bathtoy'), ('GAMES', 'game'),
                      ('CRAYONS', 'crayon'), ('DRAW_STAMPS', 'stamp'), ('RIBBONS', 'ribbon'), ('ACCESSORY_SLOTS', 'acc_slot'),
                      ('ACCESSORIES', 'acc'), ('CLOTHES', 'clothes'), ('OUTINGS', 'outing'),
-                     ('INGREDIENTS', 'ing'), ('RECIPES', 'recipe')):
+                     ('INGREDIENTS', 'ing'), ('RECIPES', 'recipe'), ('PLATES', 'plate')):
         out += [(f'g_{pre}_{x["id"]}', x['label']) for x in G.get(var, [])]
     stickers = G.get('STICKERS', [])
     out += [(f'g_sticker_{i + 1:02d}', s['label']) for i, s in enumerate(stickers)]
@@ -300,6 +304,24 @@ def collect():
                 out.append((f'm_season_acc_{a["id"]}', a['season']['when'] + L['accSeason']))
         elif a.get('unlock', 0) > 0 and 'unlockAcc' in L:
             out.append((f'm_get_acc_{a["id"]}', L['unlockAcc'] + ' ' + a['label']))
+    # ---- おりょうりゲームで 組み立てて 読む 文（js/screens/*.js・js/main.js と 同じ 形にする） ----
+    # ホームの ボタン（js/screens/main.js の buttons）
+    out += [('g_home_cook', 'つくる'), ('g_home_dress', 'おしゃれ'), ('g_home_book', 'レシピ'), ('g_home_osewa', 'おうち')]
+    for r in G.get('RECIPES', []):
+        out.append((f'm_make_{r["id"]}', r['label'] + 'を つくる ニャー！'))   # レシピを えらんだ とき
+        out.append((f'g_make_{r["id"]}', r['label'] + 'を つくる'))           # レシピちょうの「もう いちど つくる」
+    # ごほうびの おしらせ（js/main.js の G.checkRewards）
+    for key, var, line in (('recipe', 'RECIPES', 'unlockRecipe'), ('dress', 'CLOTHES', 'unlockDress'),
+                           ('dress', 'ACCESSORIES', 'unlockDress'), ('plate', 'PLATES', 'unlockPlate')):
+        out += [(f'm_unlock_{key}_{x["id"]}', x['label'] + '！ ' + L[line])
+                for x in G.get(var, []) if x.get('unlock', 0) > 0 and line in L]
+    seasonal = [x for x in G.get('RECIPES', []) + G.get('CLOTHES', []) if x.get('season')]
+    if 'giftRecipe' in L:
+        out += [(f'm_gift_{x["id"]}', x['season']['name'] + 'の ' + x['label'] + '！ ' + L['giftRecipe']) for x in seasonal]
+    # まだ とどいて いない きせつの もの（js/screens/cook.js・dress.js）
+    for x in seasonal:  # id は その月に とどく ものの id（ファイル名を 英数字に する ため）
+        if not any(t == x['season']['when'] + 'に とどく ニャー！' for _, t in out):
+            out.append((f'm_when_{x["id"]}', x['season']['when'] + 'に とどく ニャー！'))
     # 画面に じかに書いてある言葉で、まだ入っていないもの（新しいボタンなど）
     have = {t for _, t in out}
     for w in screen_words():
@@ -354,6 +376,23 @@ def reading(text):
     m = re.match(r'(\S+)に なったら プレゼントが とどく ニャー$', text)
     if m:
         return f'{MONTH_READING.get(m.group(1), m.group(1))}になったら、プレゼントが届く、ニャー。'
+    # おりょうりゲームの 組み立てた 文（名前 ＋ きまった 文）
+    def name_of(n):
+        if n in NAME_READING:
+            return NAME_READING[n]
+        if 'の ' in n:
+            a, b = n.split('の ', 1)
+            return f'{NAME_READING.get(a, a)}の{NAME_READING.get(b, b)}'
+        return n
+    m = re.match(r'(.+)を つくる( ニャー！)?$', text)
+    if m:
+        return f'{name_of(m.group(1))}を作る' + ('、ニャー！' if m.group(2) else '。')
+    m = re.match(r'(.+?)！ (.+ ニャー！)$', text)
+    if m:
+        return f'{name_of(m.group(1))}！ ' + reading(m.group(2))
+    m = re.match(r'(\S+)に とどく ニャー！$', text)
+    if m:
+        return f'{m.group(1)}に届く、ニャー！'  # 「十月」は「じっかん」と 読まれたので、月は ひらがなの まま
     if text in NAME_READING:
         return NAME_READING[text] + '。'
     text = re.sub(r' (ニャー|ニュー)([！？…〜]*)$', r'、\1\2', text)  # 語尾の 前で ひと息
