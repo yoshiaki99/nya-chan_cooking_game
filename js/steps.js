@@ -174,8 +174,12 @@ G.Dish = (function () {
       <ellipse cx="160" cy="140" rx="34" ry="8" fill="#fff" opacity=".45"/>`
   };
 
-  /* おさら（viewBox 0 0 500 360 の 中。まんなか 250,250）。F-70 */
+  /* おさら（viewBox 0 0 500 360 の 中。まんなか 250,250）。F-70。水彩の 画像は plate_<id> */
   function plateSvg(id) {
+    return inner(G.Art.pic('plate_' + (PLATE_IDS.indexOf(id) >= 0 ? id : 'round')));
+  }
+  const PLATE_IDS = ['round', 'square', 'heart', 'fish', 'cat', 'star'];
+  function plateLine(id) {
     const rim = 'fill="#fff" ' + inkA(6), inner = 'fill="none" stroke="#d9ecf3" stroke-width="8"';
     const star = (rx, ry) => { let d = ''; for (let i = 0; i < 10; i++) { const t = -Math.PI / 2 + i * Math.PI / 5, k = i % 2 ? 0.55 : 1; d += (i ? 'L' : 'M') + (250 + Math.cos(t) * rx * k).toFixed(1) + ' ' + (250 + Math.sin(t) * ry * k).toFixed(1); } return d + 'Z'; };
     switch (id) {
@@ -187,12 +191,32 @@ G.Dish = (function () {
       default: return `<ellipse cx="250" cy="250" rx="240" ry="100" ${rim}/><ellipse cx="250" cy="246" rx="190" ry="70" ${inner}/>`;
     }
   }
+  PLATE_IDS.forEach(id => { G.Art.all['plate_' + id] = () => G.Art.svg('0 0 500 360', plateLine(id)); });
   G.Art.plateSwatch = (id) => G.Art.svg('0 70 500 300', plateSvg(id));
+
+  /* できあがりの お料理（おさらなし。viewBox 0 0 400 300）。水彩の 画像が あれば final_<id> */
+  function foodOf(recipeId, data) {
+    if (recipeId === 'onigiri') return inner(G.Art.onigiri(3, data.filling || 'salmon', { nori: true }));
+    if (recipeId === 'sandwich' && G.Art.hasPic('food_sand_l')) {
+      // 2つに きった パン（画像。三角は 40〜360 の 四角に 描いてある）を もとの 絵と 同じ 場所に おき、きりくちに はさんだ ぐの 色を ならべる
+      const layers = (data.fills && data.fills.length ? data.fills : ['butter']).slice(0, 4);
+      const k = 190 / 320;
+      const half = (key, x, y) => `<g transform="translate(${x - 40 * k} ${y - 40 * k}) scale(${k})">${inner(G.Art.pic(key))}</g>`;
+      const stripes = (a, c) => layers.map((f, i) => { const o = 10 * (i + 1); return `<path d="M${a[0] + o} ${a[1] + o} L${c[0] - o} ${c[1] - o}" stroke="${FILL_COLORS[f] || '#fff3b0'}" stroke-width="8" stroke-linecap="round" opacity=".85"/>`; }).join('');
+      return half('food_sand_l', 50, 60) + stripes([50, 60], [240, 250]) + half('food_sand_r', 160, 50) + stripes([160, 50], [350, 240]);
+    }
+    if (recipeId === 'cookie' && G.Art.hasPic('cookie_heart')) {
+      const list = data.cookieShapes && data.cookieShapes.length ? data.cookieShapes : [{ k: 'heart' }, { k: 'star' }, { k: 'cat' }, { k: 'heart' }];
+      return list.map((s, i) => { const x = 90 + (i % 2) * 220 + (i > 1 ? 40 : 0), y = 120 + Math.floor(i / 2) * 110; return `<g transform="translate(${x - 73} ${y - 73}) scale(1.46)">${inner(G.Art.pic('cookie_' + s.k))}</g>`; }).join('');
+    }
+    if (G.Art.hasPic('final_' + recipeId)) return inner(G.Art.pic('final_' + recipeId));
+    return foods[recipeId] ? foods[recipeId](data) : '';
+  }
 
   /* おさら・お料理・トッピング・ソースを 1まいの 絵に（viewBox 0 0 500 360）
    * deco = { pieces: [{ id, x, y, r }], strokes: [{ c, pts: [[x, y], …] }] } */
   function svgOf(recipeId, data = {}, deco = {}) {
-    const food = foods[recipeId] ? foods[recipeId](data) : '';
+    const food = foodOf(recipeId, data);
     const pieces = (deco.pieces || []).map(p =>
       `<g transform="translate(${p.x - 35} ${p.y - 35}) rotate(${p.r || 0} 35 35) scale(.7)">${inner(G.Art.ing(p.id))}</g>`).join('');
     const strokes = (deco.strokes || []).map(s =>
@@ -204,7 +228,7 @@ G.Dish = (function () {
       <g class="dish-deco">${pieces}</g>`);
   }
 
-  return { svgOf, plateSvg, FILL_COLORS, foods };
+  return { svgOf, plateSvg, FILL_COLORS, foods, foodOf };
 })();
 
 /* ================= こうてい ================= */
@@ -216,29 +240,20 @@ G.Steps = (function () {
   const area = (ctx) => ctx.area;
 
   /* よく つかう 絵 */
-  const board = () => svg('0 0 650 680', `<rect x="40" y="300" width="570" height="330" rx="28" fill="#f2d3a8" ${inkA(5)}/>
-    <rect x="70" y="330" width="510" height="270" rx="18" fill="none" stroke="#e2bd8c" stroke-width="5"/>`);
+  const board = () => G.Art.pic('wk_board');
 
   /* ---------- ごはんを よそう ---------- */
   async function scoop(ctx) {
     const a = area(ctx), sc = ctx.sc;
     K.layer(a, 0, 0, 650, 680, board(), 'wk-bg');
     // すいはんき（右）
-    K.layer(a, 380, 120, 240, 260, svg('0 0 240 260', `
-      <rect x="20" y="70" width="200" height="170" rx="40" fill="#fffaf0" ${inkA(5)}/>
-      <path d="M30 80 Q120 10 210 80" fill="#f6a8c8" ${inkA(5)}/>
-      <rect x="90" y="150" width="60" height="30" rx="8" fill="#9ccdf0" ${inkA(4)}/>
-      <path d="M40 40 q10 -20 20 0 M80 24 q10 -20 20 0" fill="none" stroke="#c9c9d6" stroke-width="5" stroke-linecap="round"/>`));
+    K.layer(a, 380, 120, 240, 260, G.Art.pic('tool_ricecooker'));
     // しゃもじ
-    const shamoji = K.layer(a, 310, 110, 90, 150, svg('0 0 90 150', `<path d="M45 150 V70" ${inkA(14).replace(INK, '#e9c48c')}/><path d="M45 150 V70" fill="none" ${inkA(4)}/><ellipse cx="45" cy="44" rx="34" ry="42" fill="#f6e2c0" ${inkA(5)}/>`), 'wk-shamoji');
+    const shamoji = K.layer(a, 310, 110, 90, 150, G.Art.pic('tool_shamoji'), 'wk-shamoji');
     // ラップと ごはん（ひだり）
-    K.layer(a, 70, 330, 320, 220, svg('0 0 320 220', `<path d="M10 120 L60 30 H280 L310 130 L250 210 H40Z" fill="#eef7fb" opacity=".9" ${inkA(4)}/>`));
+    K.layer(a, 70, 330, 320, 220, G.Art.pic('tool_wrap'));
     const rice = K.layer(a, 100, 300, 260, 220, '', 'wk-rice');
-    const draw = (lv) => { // ごはんの やまが だんだん 大きく なる（3かいで いっぱい）
-      const w = 50 + lv * 26, h = 30 + lv * 26;
-      rice.innerHTML = lv <= 0 ? '' : svg('0 0 260 220', `<path d="M${130 - w} 175 C${130 - w} ${175 - h} ${130 - w / 2} ${175 - h * 1.25} 130 ${175 - h * 1.25} C${130 + w / 2} ${175 - h * 1.25} ${130 + w} ${175 - h} ${130 + w} 175 Q130 190 ${130 - w} 175Z" fill="#fff" ${inkA(5)}/>
-        ${Array.from({ length: lv * 3 }, (_, i) => `<ellipse cx="${130 - w * 0.6 + ((i * 41) % (w * 1.2))}" cy="${170 - ((i * 23) % Math.max(10, h))}" rx="6" ry="3.5" fill="#ece6d8"/>`).join('')}`);
-    };
+    const draw = (lv) => { rice.innerHTML = lv <= 0 ? '' : G.Art.pic('food_rice_pile' + Math.min(3, lv)); }; // ごはんの やまが だんだん 大きく なる（3かいで いっぱい）
     ctx.say(L().scoopIntro);
     let hint = K.hand(a, { x: 500, y: 250 }, null, 3);
     let lv = 0;
@@ -259,19 +274,7 @@ G.Steps = (function () {
   }
 
   /* おにぎりの 形（0 = ひらたい ごはん、1 = まるい、2 = まるい さんかく、3 = さんかく） */
-  function riceShape(stage, filling, showFilling = true) {
-    const shapes = [
-      'M70 236 C70 150 140 120 200 120 C260 120 330 150 330 236 Q200 262 70 236Z',
-      'M200 70 C280 70 320 140 320 190 C320 240 270 260 200 260 C130 260 80 240 80 190 C80 140 120 70 200 70Z',
-      'M200 56 C250 56 320 150 322 200 C322 248 276 262 200 262 C124 262 78 248 78 200 C80 150 150 56 200 56Z',
-      'M200 40 C240 40 330 170 330 210 C330 250 280 262 200 262 C120 262 70 250 70 210 C70 170 160 40 200 40Z'
-    ];
-    const fy = [180, 150, 130, 110][stage];
-    const col = G.Dish.FILL_COLORS[filling] || '#f8a58a';
-    return svg('0 0 400 300', `<path d="${shapes[stage]}" fill="#fff" ${inkA(6)}/>
-      ${[[170, 190], [230, 200], [150, 215], [250, 222], [200, 180]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="7" ry="4" fill="#ece6d8"/>`).join('')}
-      ${showFilling && filling ? `<circle cx="200" cy="${fy}" r="${stage === 0 ? 30 : 18}" fill="${col}" ${inkA(3)}/>` : ''}`);
-  }
+  const riceShape = (stage, filling, showFilling = true) => G.Art.onigiri(stage, filling, { showFilling });
 
   /* ---------- ぐを えらぶ ---------- */
   async function filling(ctx, step) {
@@ -331,7 +334,7 @@ G.Steps = (function () {
         nori.classList.add('used');
         if (tapped) { const r = UI().rectOf(rice); await K.flyTo(nori, { x: r.cx, y: r.cy + 60 }, 500); }
         nori.remove();
-        rice.innerHTML = svg('0 0 400 300', inner(riceShape(3, ctx.data.filling, false)) + `<path d="M140 196 H260 V262 Q200 266 140 262Z" fill="#33473a" ${inkA(5)}/><path d="M152 214h96M152 236h96" stroke="#4f6a57" stroke-width="4"/>`);
+        rice.innerHTML = G.Art.onigiri(3, ctx.data.filling, { showFilling: false, nori: true });
         G.Sound.play('place');
         res();
       }
@@ -340,13 +343,12 @@ G.Steps = (function () {
   }
 
   /* ---------- パンに ぬる ---------- */
-  const breadSvg = () => svg('0 0 400 400', `<path d="M40 380 V130 Q20 120 24 80 Q34 20 200 24 Q366 20 376 80 Q380 120 360 130 V380Z" fill="#e9b26e" ${inkA(6)}/>
-    <path d="M62 360 V140 Q44 130 48 96 Q58 48 200 48 Q342 48 352 96 Q356 130 338 140 V360Z" fill="#fff3d6"/>`);
+  const breadSvg = () => G.Art.pic('food_bread');
   async function spread(ctx) {
     const a = area(ctx), sc = ctx.sc;
     K.layer(a, 0, 0, 650, 680, board(), 'wk-bg');
     K.layer(a, 125, 130, 400, 400, breadSvg());
-    const butter = K.layer(a, 125, 130, 400, 400, svg('0 0 400 400', `<path d="M70 352 V146 Q54 134 58 102 Q66 58 200 58 Q334 58 342 102 Q346 134 330 146 V352Z" fill="#ffe27a"/>`), 'wk-butter');
+    const butter = K.layer(a, 125, 130, 400, 400, G.Art.pic('food_bread_butter'), 'wk-butter');
     butter.style.opacity = '0';
     K.layer(a, 520, 470, 110, 110, G.Art.ing('butter'));
     ctx.say(L().spreadIntro);
@@ -354,26 +356,25 @@ G.Steps = (function () {
     await K.progress(sc, a, {
       need: 5, rubDist: 1100, sound: 'spread',
       idle: () => { hint = K.hand(a, { x: 220, y: 300 }, { x: 430, y: 380 }, 3); },
-      onStep: (p) => { if (hint) { hint.remove(); hint = null; } butter.style.opacity = String(0.15 + p * 0.65); }
+      onStep: (p) => { if (hint) { hint.remove(); hint = null; } butter.style.opacity = String(0.15 + p * 0.85); }
     });
-    butter.style.opacity = '.8';
+    butter.style.opacity = '1';
     const r = UI().rectOf(butter);
     UI().sparkles(r.cx, r.cy, 8, 160);
     await sc.wait(700);
   }
 
   /* ---------- ぐを はさむ ---------- */
+  // はさむ ぐ（1まいめの 場所の 絵を、2まいめから 上に ずらして かさねる）
   function fillLayer(id, i) {
-    const y = 300 - i * 22, c = G.Dish.FILL_COLORS[id] || '#fff3b0';
-    if (id === 'cucumber') return [0, 1, 2, 3, 4].map(k => `<circle cx="${110 + k * 45}" cy="${y - 60 + (k % 2) * 30}" r="28" fill="#a6d98e" ${inkA(4)}/><circle cx="${110 + k * 45}" cy="${y - 60 + (k % 2) * 30}" r="12" fill="#e6f5d8"/>`).join('');
-    if (id === 'cheese') return `<rect x="${80 + i * 6}" y="${y - 150}" width="${240 - i * 12}" height="170" rx="6" fill="${c}" ${inkA(4)}/><circle cx="160" cy="${y - 90}" r="10" fill="#f2b84a"/><circle cx="240" cy="${y - 40}" r="14" fill="#f2b84a"/>`;
-    return `<path d="M${80 + i * 8} ${y} Q${70 + i * 8} ${y - 160} 200 ${y - 170} Q${330 - i * 8} ${y - 160} ${320 - i * 8} ${y}Q200 ${y + 20} ${80 + i * 8} ${y}Z" fill="${c}" ${inkA(4)}/>`;
+    const key = G.Art.all['fill_' + id] ? 'fill_' + id : 'fill_egg';
+    const k = 1 - i * 0.04;
+    return `<g transform="translate(${200 * (1 - k)} ${-i * 22 + 300 * (1 - k)}) scale(${k})">${inner(G.Art.pic(key))}</g>`;
   }
   async function fill(ctx, step) {
     const a = area(ctx), sc = ctx.sc;
     K.layer(a, 0, 0, 650, 680, board(), 'wk-bg');
-    K.layer(a, 125, 60, 400, 400, breadSvg());
-    K.layer(a, 125, 60, 400, 400, svg('0 0 400 400', `<path d="M70 352 V146 Q54 134 58 102 Q66 58 200 58 Q334 58 342 102 Q346 134 330 146 V352Z" fill="#ffe27a" opacity=".8"/>`));
+    K.layer(a, 125, 60, 400, 400, G.Art.pic('food_bread_butter'));
     const stack = K.layer(a, 125, 60, 400, 400, '');
     const fills = ctx.data.fills = [];
     ctx.say(L().fillIntro);
@@ -405,14 +406,11 @@ G.Steps = (function () {
   async function cut(ctx) {
     const a = area(ctx), sc = ctx.sc;
     K.layer(a, 0, 0, 650, 680, board(), 'wk-bg');
-    const colors = (ctx.data.fills || []).map(f => G.Dish.FILL_COLORS[f] || '#fff3b0');
-    const half = (side) => svg('0 0 400 400', `<path d="${side ? 'M40 40 L360 40 L360 360Z' : 'M40 40 L40 360 L360 360Z'}" fill="#fff3d6" stroke="#e9b26e" stroke-width="22" stroke-linejoin="round"/>
-      <path d="${side ? 'M40 40 L360 40 L360 360Z' : 'M40 40 L40 360 L360 360Z'}" fill="none" ${inkA(6)}/>
-      ${colors.map((c, i) => `<path d="M${52 + i * 12} ${52 + i * 12} L${348 - i * 12} ${348 - i * 12}" stroke="${c}" stroke-width="8" opacity="0"/>`).join('')}`);
+    const half = (side) => G.Art.pic(side ? 'food_sand_r' : 'food_sand_l');
     const left = K.layer(a, 125, 120, 400, 400, half(false), 'wk-half');
     const right = K.layer(a, 125, 120, 400, 400, half(true), 'wk-half');
     const line = K.layer(a, 125, 120, 400, 400, svg('0 0 400 400', `<path d="M40 40 L360 360" stroke="${INK}" stroke-width="6" stroke-dasharray="18 16" stroke-linecap="round"/>`), 'wk-line');
-    const knife = K.layer(a, 95, 40, 120, 120, svg('0 0 120 120', `<path d="M20 100 L70 50 L90 30 Q100 40 90 60 L40 110Z" fill="#e8e8f0" ${inkA(4)}/><path d="M20 100 L4 116" ${inkA(14).replace(INK, '#e9b26e')}/><path d="M20 100 L4 116" fill="none" ${inkA(4)}/>`), 'wk-knife');
+    const knife = K.layer(a, 95, 40, 120, 120, G.Art.pic('tool_knife_cut'), 'wk-knife');
     if (ctx.firstTime('knife')) { await ctx.say(L().nekoNoTe); await ctx.say(L().safetyKnife); } else ctx.say(L().cutIntro);
     let hint = K.hand(a, { x: 165, y: 160 }, { x: 485, y: 480 }, 3);
     // なぞった きょり（点線の 向きに すすんだ ぶん）か、タップで きれる
@@ -444,14 +442,14 @@ G.Steps = (function () {
   }
 
   /* ---------- たまごを わる ---------- */
-  const bowlBack = () => svg('0 0 400 300', `<ellipse cx="200" cy="90" rx="180" ry="60" fill="#d9ecf3" ${inkA(6)}/>`);
-  const bowlFront = () => svg('0 0 400 300', `<path d="M20 90 Q30 280 200 284 Q370 280 380 90 Q200 170 20 90Z" fill="#9ccdf0" ${inkA(6)}/>`);
+  const bowlBack = () => G.Art.pic('tool_bowl_back');
+  const bowlFront = () => G.Art.pic('tool_bowl_front');
   async function crack(ctx) {
     const a = area(ctx), sc = ctx.sc;
     K.layer(a, 0, 0, 650, 680, board(), 'wk-bg');
     K.layer(a, 60, 260, 400, 300, bowlBack());
-    K.layer(a, 60, 260, 400, 300, svg('0 0 400 300', `<ellipse cx="200" cy="96" rx="150" ry="44" fill="#fffaf0"/><path d="M110 92 q40 -36 90 -10 q30 -20 60 6" fill="#fff" ${inkA(4)}/>`));
-    const yolk = K.layer(a, 60, 260, 400, 300, svg('0 0 400 300', `<ellipse cx="230" cy="100" rx="56" ry="20" fill="#fff" opacity=".9"/><circle cx="230" cy="96" r="22" fill="#ffc83d" ${inkA(4)}/>`));
+    K.layer(a, 60, 260, 400, 300, G.Art.pic('food_bowl_flour'));
+    const yolk = K.layer(a, 60, 260, 400, 300, G.Art.pic('food_bowl_egg'));
     yolk.style.opacity = '0';
     K.layer(a, 60, 260, 400, 300, bowlFront());
     const egg = K.layer(a, 430, 100, 150, 150, G.Art.ing('egg'), 'wk-egg');
@@ -487,18 +485,14 @@ G.Steps = (function () {
     const a = area(ctx), sc = ctx.sc;
     K.layer(a, 0, 0, 650, 680, board(), 'wk-bg');
     // うえから 見た ボウル
-    K.layer(a, 95, 110, 460, 460, svg('0 0 460 460', `<circle cx="230" cy="230" r="220" fill="#9ccdf0" ${inkA(6)}/><circle cx="230" cy="230" r="186" fill="#d9ecf3" ${inkA(4)}/>`));
+    K.layer(a, 95, 110, 460, 460, G.Art.pic('tool_bowl_top'));
     const batter = K.layer(a, 95, 110, 460, 460, '', 'wk-batter');
-    const lerp = (x, y, t) => Math.round(x + (y - x) * t);
     const draw = (p) => {
-      const c = `rgb(${lerp(255, 247, p)},${lerp(250, 222, p)},${lerp(240, 160, p)})`;
-      batter.innerHTML = svg('0 0 460 460', `<circle cx="230" cy="230" r="170" fill="${c}"/>
-        <g opacity="${(1 - p).toFixed(2)}"><circle cx="270" cy="200" r="36" fill="#ffc83d"/><path d="M130 260 q40 -60 90 -10 q30 30 -20 60 q-50 20 -70 -50z" fill="#fff"/><circle cx="200" cy="300" r="30" fill="#f2f6fb"/></g>
-        <path d="M${230 + Math.cos(p * 20) * 80} ${230 + Math.sin(p * 20) * 80} a${60} ${60} 0 1 1 1 0" fill="none" stroke="#fff" stroke-width="6" opacity="${(0.2 + p * 0.4).toFixed(2)}"/>`);
+      batter.innerHTML = G.Art.fade('food_batter0', 'food_batter1', p).replace(/<\/svg>$/, '') +
+        `<path d="M${230 + Math.cos(p * 20) * 80} ${230 + Math.sin(p * 20) * 80} a60 60 0 1 1 1 0" fill="none" stroke="#fff" stroke-width="6" opacity="${(0.2 + p * 0.4).toFixed(2)}"/></svg>`;
     };
     draw(0);
-    const whisk = K.layer(a, 260, 180, 130, 260, svg('0 0 130 260', `<path d="M65 250 V150" ${inkA(14).replace(INK, '#e9c48c')}/><path d="M65 250 V150" fill="none" ${inkA(4)}/>
-      <path d="M65 150 C10 120 20 20 65 10 C110 20 120 120 65 150Z M65 150 C40 110 45 30 65 10 C85 30 90 110 65 150Z" fill="none" stroke="#a6a6c0" stroke-width="6"/>`), 'wk-whisk');
+    const whisk = K.layer(a, 260, 180, 130, 260, G.Art.pic('tool_whisk'), 'wk-whisk');
     ctx.say(L().mixIntro);
     const circle = () => K.hand(a, { x: 260, y: 300 }, { x: 400, y: 380 }, 2);
     let hint = circle();
@@ -521,14 +515,11 @@ G.Steps = (function () {
   }
 
   /* ---------- やく（火を つけて、いい においで できあがり。まっていても 自動で できる。こげない） ---------- */
-  const pan = () => svg('0 0 650 680', `<path d="M470 410 L630 470" stroke="${INK}" stroke-width="34" stroke-linecap="round"/><path d="M470 410 L630 470" stroke="#5a5060" stroke-width="22" stroke-linecap="round"/>
-    <circle cx="300" cy="340" r="230" fill="#6e6878" ${inkA(6)}/><circle cx="300" cy="340" r="196" fill="#8a8494"/>`);
-  const cake = (side) => side === 'top'
-    ? svg('0 0 400 400', `<circle cx="200" cy="200" r="170" fill="#f7dfa0" ${inkA(5)}/>${[[150, 150], [240, 130], [270, 230], [170, 260], [210, 200], [120, 220]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="9" fill="#efc77c" stroke="#d9a85e" stroke-width="3"/>`).join('')}`)
-    : svg('0 0 400 400', `<circle cx="200" cy="200" r="170" fill="#d98e44" ${inkA(5)}/><circle cx="200" cy="200" r="120" fill="#e9a65e"/><ellipse cx="160" cy="150" rx="40" ry="14" fill="#fff" opacity=".35" transform="rotate(-25 160 150)"/>`);
+  const pan = () => G.Art.pic('tool_pan');
+  const cake = (side) => G.Art.pic(side === 'top' ? 'food_pancake_top' : 'food_pancake_bottom');
   async function fry(ctx) {
     const a = area(ctx), sc = ctx.sc;
-    K.layer(a, 0, 0, 650, 680, svg('0 0 650 680', `<rect x="20" y="60" width="610" height="600" rx="30" fill="#e8e6ee" ${inkA(5)}/>`), 'wk-bg');
+    K.layer(a, 0, 0, 650, 680, G.Art.pic('wk_counter'), 'wk-bg');
     const flame = K.layer(a, 0, 0, 650, 680, svg('0 0 650 680', Array.from({ length: 14 }, (_, i) => {
       const t = i / 14 * Math.PI * 2, x = 300 + Math.cos(t) * 236, y = 340 + Math.sin(t) * 236;
       return `<path d="M${x} ${y} q-14 -26 0 -46 q14 20 0 46z" fill="#f6a24a" transform="rotate(${t * 180 / Math.PI + 90} ${x} ${y})"/>`;
@@ -537,7 +528,7 @@ G.Steps = (function () {
     K.layer(a, 0, 0, 650, 680, pan());
     const pancake = K.layer(a, 100, 140, 400, 400, cake('top'), 'wk-cake');
     pancake.style.transform = 'scale(0)';
-    const knob = K.layer(a, 520, 560, 110, 110, svg('0 0 110 110', `<circle cx="55" cy="55" r="48" fill="#fff" ${inkA(5)}/><rect x="47" y="14" width="16" height="50" rx="8" fill="#f37d9b" ${inkA(3)}/>`), 'wk-knob');
+    const knob = K.layer(a, 520, 560, 110, 110, G.Art.pic('tool_knob'), 'wk-knob');
     if (ctx.firstTime('fire')) await ctx.say(L().safetyFire);
     ctx.say(L().fryIntro);
     let hint = K.hand(a, { x: 575, y: 610 }, null, 3);
@@ -569,10 +560,10 @@ G.Steps = (function () {
   /* ---------- ひっくりかえす（上へ はじく。タップでも） ---------- */
   async function flip(ctx) {
     const a = area(ctx), sc = ctx.sc;
-    K.layer(a, 0, 0, 650, 680, svg('0 0 650 680', `<rect x="20" y="60" width="610" height="600" rx="30" fill="#e8e6ee" ${inkA(5)}/>`), 'wk-bg');
+    K.layer(a, 0, 0, 650, 680, G.Art.pic('wk_counter'), 'wk-bg');
     K.layer(a, 0, 0, 650, 680, pan());
     const pancake = K.layer(a, 100, 140, 400, 400, cake('top'), 'wk-cake');
-    const spatula = K.layer(a, 420, 470, 200, 180, svg('0 0 200 180', `<path d="M60 70 L180 170" ${inkA(14).replace(INK, '#e9c48c')}/><path d="M60 70 L180 170" fill="none" ${inkA(4)}/><rect x="0" y="20" width="100" height="70" rx="12" fill="#c9c9d6" ${inkA(5)} transform="rotate(40 50 55)"/>`));
+    const spatula = K.layer(a, 420, 470, 200, 180, G.Art.pic('tool_spatula'));
     G.Sound.sizzle(true);
     ctx.say(L().flipIntro);
     let hint = K.hand(a, { x: 300, y: 420 }, { x: 300, y: 200 }, 3);

@@ -84,6 +84,9 @@ G.Screens.cook = {
   enter(scr, sc, params) {
     const UI = G.UI, S = G.State, L = G.CHARACTER.lines, N = G.CHARACTERS.nyu.lines, K = G.StepKit;
     const recipe = G.recipe(params.recipe) || G.recipe('onigiri');
+    // この 画面で つかう 絵の ファイルを 先に 読んでおく
+    G.Art.warm(Object.keys(G.ART_FILES).filter(k => /^(wk_|tool_|food_|fill_|cookie_|base_|oven_|soup_|pan_|plate_|final_)/.test(k))
+      .concat(G.INGREDIENTS.map(x => 'ing_' + x.id)));
     const pick = (a) => Array.isArray(a) ? a[Math.floor(Math.random() * a.length)] : a;
     const data = {};
 
@@ -215,22 +218,18 @@ G.Screens.cook = {
         UI.tap(s, () => G.Voice.speak(G.ingredient(id).label, 'guide'), { sound: 'soft' });
       });
       // トレー（ここに おく）
-      const tray = UI.el('div', 'tray', G.Art.svg('0 0 600 200', `<rect x="10" y="40" width="580" height="140" rx="30" fill="#f8c6d3" stroke="#3b3236" stroke-width="5"/><rect x="34" y="60" width="532" height="100" rx="20" fill="#fde3ea"/>`));
+      const tray = UI.el('div', 'tray', G.Art.pic('tool_tray'));
       UI.pos(tray, 430, 640, 580, 200);
       root.appendChild(tray);
       const trayRect = () => ({ x: 410, y: 520, w: 620, h: 360 });
       // たな（上の まんなか）
-      const shelf = UI.el('div', 'shelf', G.Art.svg('0 0 640 60', `<rect x="10" y="10" width="620" height="34" rx="10" fill="#e9c48c" stroke="#3b3236" stroke-width="5"/>`));
+      const shelf = UI.el('div', 'shelf', G.Art.pic('tool_shelf'));
       UI.pos(shelf, 420, 450, 600, 60);
       root.appendChild(shelf);
       // れいぞうこ（右）
       const fridge = UI.el('div', 'fridge');
       UI.pos(fridge, 1030, 130, 310, 700);
-      fridge.innerHTML = `<div class="fr-in">${G.Art.svg('0 0 310 700', `<rect x="6" y="6" width="298" height="688" rx="28" fill="#eaf6fb" stroke="#3b3236" stroke-width="6"/>
-          <path d="M20 250 H290 M20 470 H290" stroke="#9ccdf0" stroke-width="8"/>`)}</div>
-        <div class="fr-door">${G.Art.svg('0 0 310 700', `<rect x="6" y="6" width="298" height="688" rx="28" fill="#fffdf8" stroke="#3b3236" stroke-width="6"/>
-          <path d="M6 300 H304" stroke="#3b3236" stroke-width="5"/><rect x="250" y="80" width="20" height="150" rx="10" fill="#d9d6de" stroke="#3b3236" stroke-width="4"/>
-          <rect x="250" y="360" width="20" height="200" rx="10" fill="#d9d6de" stroke="#3b3236" stroke-width="4"/>`)}</div>`;
+      fridge.innerHTML = `<div class="fr-in">${G.Art.pic('tool_gfridge_in')}</div><div class="fr-door">${G.Art.pic('tool_gfridge_door')}</div>`;
       root.appendChild(fridge);
 
       let wrong = 0;
@@ -423,7 +422,7 @@ G.Screens.cook = {
       }
 
       // ふきん（ぜんぶ やりなおし）
-      const cloth = UI.el('div', 'deco-tool cloth', G.Art.svg('0 0 100 100', `<path d="M16 30 Q50 14 84 30 L78 78 Q50 90 22 78Z" fill="#9ccdf0" stroke="#3b3236" stroke-width="4" stroke-linejoin="round"/><path d="M26 44 h48M28 60 h44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`));
+      const cloth = UI.el('div', 'deco-tool cloth', G.Art.pic('tool_cloth'));
       UI.pos(cloth, startX + tools.length * 130 + 20, 850, 116, 116);
       root.appendChild(cloth);
       UI.tap(cloth, () => {
@@ -475,7 +474,7 @@ G.Screens.eat = {
     /* ニューちゃん（まんなか・テーブルの うしろ）と ニャーちゃん（ひだり） */
     const nyu = new G.NyuSprite(scr, { x: 760, y: 700, h: 470 * G.CHARACTERS.nyu.scale });
     nyu.el.classList.add('at-table');
-    const table = UI.el('div', 'table-front', G.Art.all.table_front());
+    const table = UI.el('div', 'table-front', G.Art.pic('table_front'));
     UI.pos(table, 330, 600, 900, 424);
     scr.appendChild(table);
     const chara = new G.Chara(scr, { x: 190, y: 860, h: 420 });

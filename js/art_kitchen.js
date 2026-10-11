@@ -211,7 +211,7 @@ window.G = window.G || {};
       <circle cx="98" cy="61" r="13" fill="#fffaf0" ${ink(4)}/><path d="M98 54a7 7 0 1 1 -1 0" fill="none" stroke="#f6a8c8" stroke-width="3"/>
       <circle cx="40" cy="42" r="7" fill="#f2577e" ${ink(3)}/><circle cx="62" cy="40" r="7" fill="#f2577e" ${ink(3)}/>`)
   };
-  G.Art.dish = (id) => (dishes['dish_' + id] || icons.plate)();
+  G.Art.dish = (id) => (dishes['dish_' + id] ? G.Art.pic('dish_' + id) : icons.plate());
 
   Object.assign(G.Art.all, icons, dishes, {
     bg_kitchen: () => bgKitchen(false),
