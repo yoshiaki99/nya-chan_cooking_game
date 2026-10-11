@@ -95,7 +95,8 @@ window.G = window.G || {};
       <circle cx="50" cy="58" r="11" fill="#fff" ${ink(3)}/><circle cx="50" cy="59" r="6" fill="#f05a4e"/>`)
   };
   Object.keys(ing).forEach(k => { G.Art.all['ing_' + k] = ing[k]; });
-  G.Art.ing = (id) => (ing[id] ? ing[id]() : G.Art.all.plate());
+  // 水彩の 画像（ing_<id>）が あれば それを 出す（G.Art.pic は js/art_cook.js）
+  G.Art.ing = (id) => (ing[id] ? G.Art.pic('ing_' + id) : G.Art.all.plate());
   G.Art.hasIng = (id) => !!ing[id];
 
   /* ---------- できあがりの お料理（js/art_kitchen.js の おにぎり・サンドイッチ・ホットケーキ などに 足す） ---------- */
@@ -126,5 +127,5 @@ window.G = window.G || {};
   };
   Object.assign(G.Art.all, dishes);
   const prevDish = G.Art.dish;
-  G.Art.dish = (id) => (dishes['dish_' + id] ? dishes['dish_' + id]() : prevDish(id));
+  G.Art.dish = (id) => (dishes['dish_' + id] ? G.Art.pic('dish_' + id) : prevDish(id));
 })();

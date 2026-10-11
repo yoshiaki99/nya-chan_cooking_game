@@ -260,7 +260,9 @@ G.Screens = G.Screens || {};
       setTimeout(() => $('#boot').remove(), 600);
       if (G.Link.fromOsewa && !G.State.overLimit()) G.go('home', { from: 'osewa' }); // おせわゲームから きたら タイトルを とばす（F-D0）
       else G.go('title');
-      G.Assets.loadAll(G.Assets.keys()).then(() => G.CharaArt.warm(G.State.ribbon()));
+      // 画面に <img> で 出す 絵（キャラクター・背景・ボタン）だけ 先に 読んでおく。
+      // おりょうりの 道具・食べものの 絵（G.Art.pic）は 数が 多いので、つかう ときに 読む（メモリを つかいすぎない）
+      G.Assets.loadAll(G.Assets.keys().filter(k => /^(chara:|bg_|icon_|kitchen_table)/.test(k))).then(() => G.CharaArt.warm(G.State.ribbon()));
     });
 
     setupOffline();

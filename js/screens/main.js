@@ -99,7 +99,7 @@ G.Screens.home = {
     const drawTummy = () => {
       const n = S.tummyPlates();
       let h = '';
-      for (let i = 0; i < G.TUMMY_FULL; i++) h += `<div class="tm-plate">${(i < n ? G.Art.all.plate_full : G.Art.all.plate)()}</div>`;
+      for (let i = 0; i < G.TUMMY_FULL; i++) h += `<div class="tm-plate">${G.Art.pic(i < n ? 'plate_full' : 'plate')}</div>`;
       tummyBox.innerHTML = h;
     };
     drawTummy();
